@@ -13,6 +13,7 @@ if (!params.fastq_input_pattern) {
 }
 def fastq_input_pattern = input_dir + "/" + params.fastq_input_pattern
 
+params.skip_alignment = true
 
 workflow {
 
@@ -22,7 +23,7 @@ workflow {
 	
 	fastq_ch = fastq_input.out.fastqs
 
-	nevermore_prep_align(fastq_ch)
+	nevermore_main(fastq_ch)
 
 	fastq_ch = nevermore_prep_align.out.fastqs
 	fastq_ch.view()
