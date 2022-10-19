@@ -26,7 +26,7 @@ workflow {
 
 	nevermore_main(fastq_ch)
 
-	fastq_ch = nevermore_prep_align.out.fastqs
+	fastq_ch = nevermore_main.out.fastqs
 	fastq_ch.view()
 
 
