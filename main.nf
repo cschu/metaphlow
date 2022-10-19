@@ -2,6 +2,7 @@
 
 nextflow.enable.dsl=2
 
+include { nevermore_main } from "./nevermore/workflows/nevermore"
 include { nevermore_prep_align } from "./nevermore/workflows/align"
 include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4 } from "./nevermore/modules/profilers/metaphlan4"
