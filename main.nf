@@ -2,10 +2,9 @@
 
 nextflow.enable.dsl=2
 
-include { nevermore_main } from "./nevermore/workflows/nevermore"
-include { gffquant_flow } from "./nevermore/workflows/gffquant"
+include { nevermore_prep_align } from "./nevermore/workflows/align"
 include { fastq_input } from "./nevermore/workflows/input"
-include { db_filter; db2bed3 } from "./nevermore/modules/align/helpers"
+include { run_metaphlan4 } from "./nevermore/modules/profiles/metaphlan4"
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
 
@@ -23,19 +22,15 @@ workflow {
 	
 	fastq_ch = fastq_input.out.fastqs
 
-	nevermore_main(fastq_ch)
+	nevermore_prep_align(fastq_ch)
 
-	if (!params.skip_dbfilter) {
-		db2bed3(params.gq_db)
-		db_filter(nevermore_main.out.alignments, db2bed3.out.db)
-	}
+	fastq_ch = nevermore_prep_align.out.fastqs
+	fastq_ch.view()
+
 
 	if (!params.skip_profiling) {
 
-		
-
-		//gffquant_flow(nevermore_main.out.alignments)
-		gffquant_flow(db_filter.out.bam)
+		run_metaphlan4(fastq_ch, params.mp4_db)
 
 	}
 
