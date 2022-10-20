@@ -46,7 +46,7 @@ workflow {
 				return tuple(meta, bt2)
 			}
 
-		combine_metaphlan(mp4_ch)
+		combine_metaphlan4(mp4_ch)
 
 		collate_metaphlan4_tables(combine_metaphlan.out.mp4_table.collect())
 
