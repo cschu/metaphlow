@@ -48,7 +48,7 @@ workflow {
 
 		combine_metaphlan4(mp4_ch)
 
-		collate_metaphlan4_tables(combine_metaphlan.out.mp4_table.collect())
+		collate_metaphlan4_tables(combine_metaphlan4.out.mp4_table.collect())
 
 	}
 
