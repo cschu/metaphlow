@@ -41,7 +41,7 @@ workflow {
 			}
 			.groupTuple(sort: true)
 
-		collate_metaphlan4_tables()
+		collate_metaphlan4_tables(mp4_ch)
 
 	}
 
