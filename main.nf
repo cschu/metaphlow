@@ -5,7 +5,7 @@ nextflow.enable.dsl=2
 include { nevermore_main } from "./nevermore/workflows/nevermore"
 include { nevermore_prep_align } from "./nevermore/workflows/align"
 include { fastq_input } from "./nevermore/workflows/input"
-include { run_metaphlan4; combine_metaphlan; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
+include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
 
