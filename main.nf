@@ -46,6 +46,8 @@ workflow {
 				return tuple(meta, fastqs.flatten())
 			}
 
+		fastq_ch.view()
+
 		run_metaphlan4(fastq_ch, params.mp4_db)
 
 		// mp4_ch = run_metaphlan4.out.mp4_bt2
