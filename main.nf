@@ -35,7 +35,7 @@ workflow {
 		fastq_ch = fastq_ch
 			.map { sample, fastqs ->
 				sample_id = sample.id.replaceAll(/\.singles$/, "")
-				if (!fastqs instance of Collection) {
+				if (!fastqs instanceof Collection) {
 					//fq = fastqs
 					fastqs = [fastqs] as ArrayList
 
