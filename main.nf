@@ -63,8 +63,10 @@ workflow {
 		// 	}
 
 		// combine_metaphlan4(mp4_ch)
+		mp4_tables_ch = run_metaphlan4.out.mp4_table
+			.map { sample, table -> return table }
 
-		collate_metaphlan4_tables(run_metaphlan4.out.mp4_table.collect())
+		collate_metaphlan4_tables(mp4_tables_ch.collect())
 
 	}
 
