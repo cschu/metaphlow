@@ -32,23 +32,35 @@ workflow {
 
 	if (!params.skip_profiling) {
 
-		run_metaphlan4(fastq_ch, params.mp4_db)
-
-		mp4_ch = run_metaphlan4.out.mp4_bt2
-			.map { sample, bt2 ->
+		fastq_ch = fastq_ch
+			.map { sample, fastqs ->
 				sample_id = sample.id.replaceAll(/\.singles$/, "")
-				return tuple(sample_id, bt2)
+				return tuple(sample_id, fastqs)
 			}
 			.groupTuple(sort: true)
-			.map { sample_id, bt2 ->
+			.map { sample_id, fastqs ->
 				def meta = [:]
 				meta.id = sample_id				
-				return tuple(meta, bt2)
+				return tuple(meta, fastqs)
 			}
 
-		combine_metaphlan4(mp4_ch)
+		run_metaphlan4(fastq_ch, params.mp4_db)
 
-		collate_metaphlan4_tables(combine_metaphlan4.out.mp4_table.collect())
+		// mp4_ch = run_metaphlan4.out.mp4_bt2
+		// 	.map { sample, bt2 ->
+		// 		sample_id = sample.id.replaceAll(/\.singles$/, "")
+		// 		return tuple(sample_id, bt2)
+		// 	}
+		// 	.groupTuple(sort: true)
+		// 	.map { sample_id, bt2 ->
+		// 		def meta = [:]
+		// 		meta.id = sample_id				
+		// 		return tuple(meta, bt2)
+		// 	}
+
+		// combine_metaphlan4(mp4_ch)
+
+		collate_metaphlan4_tables(run_metaphlan4.out.mp4_table.collect())
 
 	}
 
