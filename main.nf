@@ -35,6 +35,7 @@ workflow {
 		fastq_ch = fastq_ch
 			.map { sample, fastqs ->
 				sample_id = sample.id.replaceAll(/\.singles$/, "")
+				fastqs = (fastqs instanceof Collection) ? fastqs : [fastqs]
 				return tuple(sample_id, fastqs)
 			}
 			.groupTuple(sort: true)
