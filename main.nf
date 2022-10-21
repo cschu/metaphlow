@@ -35,14 +35,10 @@ workflow {
 		fastq_ch = fastq_ch
 			.map { sample, fastqs ->
 				sample_id = sample.id.replaceAll(/\.singles$/, "")
-				if (!fastqs instanceof ArrayList) {
-					//fq = fastqs
-					fastqs = [fastqs] as ArrayList
-
-				}
-				// fastqs = (fastqs instanceof Collection) ? fastqs : [fastqs]
 				return tuple(sample_id, fastqs)
 			}
+			.groupTuple()
+			.map { sample_id, fastqs -> return tuple(sample_id, fastqs.flatten()) }
 			.groupTuple(sort: true)
 			.map { sample_id, fastqs ->
 				def meta = [:]
