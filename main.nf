@@ -38,8 +38,8 @@ workflow {
 				return tuple(sample_id, fastqs)
 			}
 			.groupTuple()
-			.map { sample_id, fastqs -> return tuple(sample_id, fastqs.flatten()) }
-			.groupTuple(sort: true)
+			// .map { sample_id, fastqs -> return tuple(sample_id, fastqs.flatten()) }
+			// .groupTuple(sort: true)
 			.map { sample_id, fastqs ->
 				def meta = [:]
 				meta.id = sample_id				
