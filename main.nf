@@ -43,7 +43,7 @@ workflow {
 			.map { sample_id, fastqs ->
 				def meta = [:]
 				meta.id = sample_id				
-				return tuple(meta, fastqs)
+				return tuple(meta, fastqs.flatten())
 			}
 
 		run_metaphlan4(fastq_ch, params.mp4_db)
