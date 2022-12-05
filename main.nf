@@ -29,7 +29,7 @@ workflow {
 	nevermore_main(fastq_ch)
 
 	fastq_ch = nevermore_main.out.fastqs
-	fastq_ch.view()
+	// fastq_ch.view()
 
 
 	if (!params.skip_profiling) {
@@ -48,7 +48,7 @@ workflow {
 				return tuple(meta, fastqs.flatten())
 			}
 
-		fastq_ch.view()
+		// fastq_ch.view()
 
 		run_metaphlan4(fastq_ch, params.mp4_db)
 		
