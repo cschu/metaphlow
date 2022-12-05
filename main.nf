@@ -72,7 +72,7 @@ workflow {
 
 		
 		if (params.run_metaphlan3) {
-			run_metaphlan3()
+			run_metaphlan3(fastq_ch, params.mp3_db)
 			mp3_tables_ch = run_metaphlan3.out.mp3_table
 			.map { sample, table -> return table }
 
