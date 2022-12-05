@@ -9,7 +9,7 @@ process run_metaphlan3 {
 	// tuple val(sample), path("${sample.id}.bowtie2.bz2"), emit: mp3_bt2
 	
 	script:
-	def mp3_params = "--bowtie2db ${mp3_db} --index \$(cat ${mp3_db}/mpa_latest) --input_type fastq --nproc ${task.cpus} --tmp_dir tmp/"
+	def mp3_params = "--index \$(cat ${mp3_db}/mpa_latest) --bowtie2db ${mp3_db} --input_type fastq --nproc ${task.cpus} --tmp_dir tmp/"
 	def mp3_input = ""
 	def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
 
