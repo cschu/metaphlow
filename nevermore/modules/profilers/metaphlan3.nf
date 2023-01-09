@@ -40,6 +40,8 @@ process run_metaphlan3 {
 		fi
 	fi
 
+	echo metaphlan \$final_input ${additional_mp3_params} ${mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
+
 	metaphlan \$final_input ${additional_mp3_params} ${mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
 	"""
 }
