@@ -36,7 +36,7 @@ process run_metaphlan3 {
 	if [[ -e ${sample.id}.singles_R1.fastq.gz && ${mp3_input} != ${sample.id}.singles_R1.fastq.gz ]]; then
 		nlines=\$(gzip -dc ${sample.id}.singles_R1.fastq.gz | head | wc -l)
 		if [[ \$nlines -gt 4 ]]; then
-			final_input=\$final_input,${sample.id}.singles_R1.fastq.gz
+			final_input=\$final_input\",${sample.id}.singles_R1.fastq.gz\"
 		fi
 	fi
 
