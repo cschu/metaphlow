@@ -22,7 +22,10 @@ process run_metaphlan3 {
 		mp3_input = "${fastqs}"
 	}
 
-
+	def additional_mp3_params = ""
+	if (params.mp3_params) {
+		additional_mp3_params = params.mp3_params
+	}
 
 
 	"""
@@ -37,7 +40,7 @@ process run_metaphlan3 {
 		fi
 	fi
 
-	metaphlan \$final_input ${mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
+	metaphlan \$final_input ${mp3_params} ${additional_mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
 	"""
 }
 
