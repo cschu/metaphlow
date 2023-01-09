@@ -35,6 +35,7 @@ process run_metaphlan3 {
 		if [[ \$nlines -gt 4 ]]; then
 			final_input=\$final_input
 		fi
+	fi
 
 	metaphlan \$final_input ${mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
 	"""
