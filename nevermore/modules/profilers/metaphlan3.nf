@@ -14,18 +14,35 @@ process run_metaphlan3 {
 	def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
 
 	
-	if (fastqs instanceof Collection && fastqs.size() == 2) {
+	if (fastqs instanceof Collection && fastqs.size() >= 2) {
 		mp3_input = "${sample.id}_R1.fastq.gz,${sample.id}_R2.fastq.gz"
-	} else if (fastqs instanceof Collection && fastqs.size() == 3) {
-		mp3_input = "${sample.id}_R1.fastq.gz,${sample.id}_R2.fastq.gz,${sample.id}.singles_R1.fastq.gz"
+	// } else if (fastqs instanceof Collection && fastqs.size() == 3) {
+	// 	mp3_input = "${sample.id}_R1.fastq.gz,${sample.id}_R2.fastq.gz,${sample.id}.singles_R1.fastq.gz"
 	} else {
 		mp3_input = "${fastqs}"
 	}
 
+	def additional_mp3_params = ""
+	if (params.mp3_params) {
+		additional_mp3_params = params.mp3_params
+	}
+
+
 	"""
 	mkdir -p tmp/ metaphlan3_tables/
 
-	metaphlan ${mp3_input} ${mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
+	final_input=${mp3_input}
+
+	if [[ -e ${sample.id}.singles_R1.fastq.gz && ${mp3_input} != ${sample.id}.singles_R1.fastq.gz ]]; then
+		nlines=\$(gzip -dc ${sample.id}.singles_R1.fastq.gz | head | wc -l)
+		if [[ \$nlines -gt 4 ]]; then
+			final_input=\$final_input\",${sample.id}.singles_R1.fastq.gz\"
+		fi
+	fi
+
+	echo metaphlan \$final_input ${additional_mp3_params} ${mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
+
+	metaphlan \$final_input ${additional_mp3_params} ${mp3_params} ${bt2_out} -o metaphlan3_tables/${sample.id}.mp3.txt
 	"""
 }
 
