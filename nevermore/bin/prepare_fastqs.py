@@ -230,7 +230,7 @@ def is_fastq(f, valid_fastq_suffixes, valid_compression_suffixes):
 
 	valid_compression = not compression_suffix or compression_suffix[0] in valid_compression_suffixes
 
-	return valid_compression and fastq_suffix in valid_fastq_suffixes
+	return os.path.isfile(f) and valid_compression and fastq_suffix in valid_fastq_suffixes
 	# prefix, suffix = os.path.splitext(f)
 	# if suffix in valid_fastq_suffixes:
 	# 	return True
