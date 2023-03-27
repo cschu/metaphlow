@@ -6,12 +6,18 @@ process run_metaphlan4 {
 
 	output:
 	tuple val(sample), path("${sample.id}.mp4.txt"), emit: mp4_table
+	tuple val(sample), path("${sample.id}.mp4.sam.bz2"), emit: mp4_sam
 	// tuple val(sample), path("${sample.id}.bowtie2.bz2"), emit: mp4_bt2
 	
 	script:
 	def mp4_params = "--bowtie2db ${mp4_db} --input_type fastq --nproc ${task.cpus} --tmp_dir tmp/"
 	def mp4_input = ""
 	def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
+
+	def samestr_params = ""
+	if (params.run_samestr) {
+		samestr_params = "--legacy-output -t rel_ab --samout ${sample.id}.mp4.sam.bz2"
+	}
 
 	
 	if (fastqs instanceof Collection && fastqs.size() == 2) {
@@ -25,7 +31,8 @@ process run_metaphlan4 {
 	"""
 	mkdir -p tmp/
 
-	metaphlan ${mp4_input} ${mp4_params} ${bt2_out} -o ${sample.id}.mp4.txt
+	metaphlan ${mp4_input} ${mp4_params} ${bt2_out} -o ${sample.id}.mp4.txt ${samestr_params}
+	touch ${sample.id}.mp4.sam.bz2"
 	"""
 }
 
