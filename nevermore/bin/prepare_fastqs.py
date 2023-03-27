@@ -288,9 +288,10 @@ def main():
 		)
 
 	root_fastqs = collect_fastq_files(args.input_dir, valid_fastq_suffixes, valid_compression_suffixes)
+	print(root_fastqs)
 
 	if samples and root_fastqs:
-		raise ValueError("Found {len(root_fastqs)} fastq files in input directory together with {len(samples)} sample directories. Please check input data.")
+		raise ValueError(f"Found {len(root_fastqs)} fastq files in input directory together with {len(samples)} sample directories. Please check input data.")
 	elif root_fastqs:
 		for f in root_fastqs:
 			sample = re.sub(fastq_file_suffix_pattern, "", os.path.basename(f))
