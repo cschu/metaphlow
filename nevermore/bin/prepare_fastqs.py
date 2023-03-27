@@ -222,13 +222,22 @@ def is_fastq(f, valid_fastq_suffixes, valid_compression_suffixes):
 	 - true if file is fastq else false
 
 	"""
-	prefix, suffix = os.path.splitext(f)
-	if suffix in valid_fastq_suffixes:
-		return True
-	if suffix in valid_compression_suffixes:
-		_, suffix = os.path.splitext(prefix)
-		return suffix in valid_fastq_suffixes
-	return False
+	filename_tokens = re.split(r"[._]", f)
+	try:
+		fastq_suffix, *compression_suffix = filename_tokens[-2:]
+	except ValueError:
+		return False
+
+	valid_compression = not compression_suffix or compression_suffix[0] in valid_compression_suffixes
+
+	return valid_compression and fastq_suffix in valid_fastq_suffixes
+	# prefix, suffix = os.path.splitext(f)
+	# if suffix in valid_fastq_suffixes:
+	# 	return True
+	# if suffix in valid_compression_suffixes:
+	# 	_, suffix = os.path.splitext(prefix)
+	# 	return suffix in valid_fastq_suffixes
+	# return False
 
 
 def main():
