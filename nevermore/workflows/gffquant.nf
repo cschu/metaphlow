@@ -1,5 +1,7 @@
 include { run_gffquant; collate_feature_counts; } from "../modules/profilers/gffquant"
 
+params.gq_collate_columns = "uniq_scaled,combined_scaled"
+
 
 workflow gffquant_flow {
 
@@ -15,6 +17,7 @@ workflow gffquant_flow {
 			.map { sample, files -> return files }
 			.flatten()
 			.filter { !it.name.endsWith("Counter.txt.gz") }
+			.filter { params.collate_gene_counts || !it.name.endsWith("gene_counts.txt.gz") }
 			.map { file -> 
 				def category = file.name
 					.replaceAll(/\.txt\.gz$/, "")
@@ -22,6 +25,9 @@ workflow gffquant_flow {
 				return tuple(category, file)
 			}
 			.groupTuple(sort: true)
+			.combine(
+				Channel.from(params.gq_collate_columns.split(","))
+			)
 
 		collate_feature_counts(feature_count_ch)
 

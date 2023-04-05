@@ -233,6 +233,13 @@ def is_fastq(f, valid_fastq_suffixes, valid_compression_suffixes):
 	logger.info('OBJECT: %s FASTQ: %s COMPRESSION: %s ISFILE: %s' % (f, fastq_suffix in valid_fastq_suffixes, valid_compression, os.path.isfile(f)))
 
 	return os.path.isfile(f) and valid_compression and fastq_suffix in valid_fastq_suffixes
+
+	# if not compression_suffix:
+	# 	return fq_suffix in valid_fastq_suffixes
+	# else:
+	# 	return compression_suffix[0] in valid_compression_suffixes and fq_suffix in valid_fastq_suffixes
+
+
 	# prefix, suffix = os.path.splitext(f)
 	# if suffix in valid_fastq_suffixes:
 	# 	return True
@@ -290,7 +297,6 @@ def main():
 		)
 
 	root_fastqs = collect_fastq_files(args.input_dir, valid_fastq_suffixes, valid_compression_suffixes)
-	print(root_fastqs)
 
 	if samples and root_fastqs:
 		raise ValueError(f"Found {len(root_fastqs)} fastq files in input directory together with {len(samples)} sample directories. Please check input data.")
