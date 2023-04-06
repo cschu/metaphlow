@@ -8,6 +8,9 @@ include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
 
+include { samestr } from "./nevermore/workflows/samestr"
+
+
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
 
 if (!params.fastq_input_pattern) {
@@ -69,6 +72,17 @@ workflow {
 			.map { sample, table -> return table }
 
 		collate_metaphlan4_tables(mp4_tables_ch.collect())
+
+		if (params.run_samestr) {
+			samestr(
+				run_metaphlan4.out.mp4_sam
+				.join(run_metaphlan.out.mp4_table)
+				.map { sample, sam, profile ->
+					return tuple(sam, profile)
+				}
+				.collect()
+			)
+		}
 
 		
 		if (params.run_metaphlan3) {
