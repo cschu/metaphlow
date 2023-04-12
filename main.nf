@@ -77,7 +77,7 @@ workflow {
 		if (params.run_samestr) {
 			samestr_input_ch = run_metaphlan4.out.mp4_sam
 				.join(run_metaphlan4.out.mp4_table)
-				.map { sample, sam, profile -> return sam, profile }
+				.map { sample, sam, profile -> return tuple(sam, profile) }
 				.collect()
 
 			run_samestr_convert(
