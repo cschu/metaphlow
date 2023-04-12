@@ -1,7 +1,7 @@
 process run_samestr_convert {
     
     input:
-		tuple path(mp_sam), path(mp_profile)
+		tuple path(mp_sam) //, path(mp_profile)
 		path(marker_db)
 
     output:
