@@ -9,6 +9,7 @@ include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
 
 include { samestr } from "./nevermore/workflows/samestr"
+include { run_samestr_convert } from "./nevermore/modules/profilers/samestr"
 
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
@@ -77,14 +78,20 @@ workflow {
 			samestr_input_ch = run_metaphlan4.out.mp4_sam
 				.map { sample, sam -> return sam }
 				.collect()
-			samestr(
-				samestr_input_ch
-				// .join(run_metaphlan4.out.mp4_table)
-				// .map { sample, sam, profile ->
-				// 	return tuple(sam, profile)
-				// }
-				// .collect()
-			)
+
+			run_samestr_convert(
+				samestr_input_ch,
+				params.samestr_marker_db
+			)	
+
+			// samestr(
+			// 	samestr_input_ch
+			// 	// .join(run_metaphlan4.out.mp4_table)
+			// 	// .map { sample, sam, profile ->
+			// 	// 	return tuple(sam, profile)
+			// 	// }
+			// 	// .collect()
+			// )
 		}
 
 		
