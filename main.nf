@@ -76,7 +76,7 @@ workflow {
 		if (params.run_samestr) {
 			samestr(
 				run_metaphlan4.out.mp4_sam
-				.join(run_metaphlan.out.mp4_table)
+				.join(run_metaphlan4.out.mp4_table)
 				.map { sample, sam, profile ->
 					return tuple(sam, profile)
 				}
