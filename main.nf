@@ -9,7 +9,7 @@ include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
 
 include { samestr } from "./nevermore/workflows/samestr"
-include { run_samestr_convert } from "./nevermore/modules/profilers/samestr"
+include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize } from "./nevermore/modules/profilers/samestr"
 
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
@@ -83,7 +83,31 @@ workflow {
 			run_samestr_convert(
 				samestr_input_ch,
 				params.samestr_marker_db
-			)	
+			)
+
+			grouped_npy_ch = run_samestr_convert.out.sstr_npy
+				.flatten()
+				.map { file ->
+						def species = file.name.replaceAll(/[.].*/, "")
+						return tuple(species, file)
+				}
+				.groupTuple(sort: true)
+            
+			run_samestr_merge(grouped_npy_ch)
+			run_samestr_filter(
+				run_samestr_merge.out.sstr_npy
+				params.samestr_marker_db
+			)
+			run_samestr_stats(run_samestr_filter.out.sstr_npy)
+			run_samestr_compare(run_samestr_filter.out.sstr_npy)
+
+			// symlink all sstr_compare/mp_profiles
+			run_samestr_summarize(
+				run_samestr_compare.out.sstr_compare.collect(),
+				samestr_convert_ch
+					.map { sam, profile -> return profile }
+					.collect()
+			)
 
 			// samestr(
 			// 	samestr_input_ch
