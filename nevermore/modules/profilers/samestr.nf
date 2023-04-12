@@ -14,7 +14,7 @@ process run_samestr_convert {
         --input-files ${mp_sam} \
         --min-vcov 1 \
         --min-aln-qual 0 \
-        --mp-profiles-extension .mp4.txt \
+        --mp-profiles-extension .txt \
         --marker-dir ${marker_db} \
         --output-dir sstr_convert/ \
         --nprocs ${task.cpus}
