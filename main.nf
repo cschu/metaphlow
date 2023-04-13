@@ -95,7 +95,7 @@ workflow {
             
 			run_samestr_merge(grouped_npy_ch)
 			run_samestr_filter(
-			 	run_samestr_merge.out.sstr_npy
+			 	run_samestr_merge.out.sstr_npy,
 			 	params.samestr_marker_db
 			)
 			// run_samestr_stats(run_samestr_filter.out.sstr_npy)
