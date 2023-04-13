@@ -105,9 +105,9 @@ process run_samestr_compare {
 
     output:
         tuple \
-            path("sstr_compare/${species}.closest.txt"),
-            path("sstr_compare/${species}.fraction.txt"),
-            path("sstr_compare/${species}.overlap.txt"),
+            path("sstr_compare/${species}.closest.txt"), \
+            path("sstr_compare/${species}.fraction.txt"), \
+            path("sstr_compare/${species}.overlap.txt"), \
         emit: sstr_compare
 
     script:
@@ -129,12 +129,11 @@ process run_samestr_summarize {
 
     output:
         tuple \
-            path("sstr_summarize/mp_counts.tsv"),
-            path("sstr_summarize/mp_species.tsv"),
-            path("sstr_summarize/mp_taxonomy.tsv"),
-            path("sstr_summarize/sstr_cooccurrences.tsv"),
-            path("sstr_summarize/sstr_strain_events.tsv"),
-
+            path("sstr_summarize/mp_counts.tsv"), \
+            path("sstr_summarize/mp_species.tsv"), \
+            path("sstr_summarize/mp_taxonomy.tsv"), \
+            path("sstr_summarize/sstr_cooccurrences.tsv"), \
+            path("sstr_summarize/sstr_strain_events.tsv"), \
         emit: sstr_summarize
 
     script:
