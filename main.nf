@@ -75,13 +75,15 @@ workflow {
 		collate_metaphlan4_tables(mp4_tables_ch.collect())
 
 		if (params.run_samestr) {
-			samestr_input_ch = run_metaphlan4.out.mp4_sam
-				.join(run_metaphlan4.out.mp4_table)
-				.map { sample, sam, profile -> return tuple(sam, profile) }
-				.collect()
+			// samestr_input_ch = run_metaphlan4.out.mp4_sam
+			// 	.join(run_metaphlan4.out.mp4_table)
+			// 	.map { sample, sam, profile -> return tuple(sam, profile) }
+			// 	.collect()
 
 			run_samestr_convert(
-				samestr_input_ch,
+				// samestr_input_ch,
+				run_metaphlan4.out.mp4_sam.map { sample, sam -> return sam},
+				run_metaphlan4.out.mp4_table { sample, table -> return table},
 				params.samestr_marker_db
 			)
 
