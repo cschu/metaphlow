@@ -104,12 +104,12 @@ workflow {
 			run_samestr_compare(run_samestr_filter.out.sstr_npy)
 
 			// symlink all sstr_compare/mp_profiles
-			// run_samestr_summarize(
-			// 	run_samestr_compare.out.sstr_compare.collect(),
-			// 	samestr_input_ch
-			// 		.map { sam, profile -> return profile }
-			// 		.collect()
-			// )
+			run_samestr_summarize(
+				run_samestr_compare.out.sstr_compare.collect(),
+				samestr_input_ch
+					.map { sam, profile -> return profile }
+					.collect()
+			)
 
 			// samestr(
 			// 	samestr_input_ch
