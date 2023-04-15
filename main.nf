@@ -106,9 +106,10 @@ workflow {
 			// symlink all sstr_compare/mp_profiles
 			run_samestr_summarize(
 				run_samestr_compare.out.sstr_compare.collect(),
-				samestr_input_ch
-					.map { sam, profile -> return profile }
-					.collect()
+				run_metaphlan4.out.mp4_table.map { sample, table -> return table}.collect()
+				// samestr_input_ch
+				// 	.map { sam, profile -> return profile }
+				// 	.collect()
 			)
 
 			// samestr(
