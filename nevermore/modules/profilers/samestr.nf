@@ -140,7 +140,7 @@ process run_samestr_summarize {
     script:
     """
     mkdir profiles/
-    find . -maxdepth 0 -name '*.mp4.txt' -exec ln -s {} profiles/ \;
+    find . -maxdepth 0 -name '*.mp4.txt' -exec ln -s {} profiles/ \\;
 
     samestr --verbosity DEBUG \
     summarize \
