@@ -139,10 +139,13 @@ process run_samestr_summarize {
 
     script:
     """
+    mkdir profiles/
+    find . -maxdepth 0 -name '*.mp4.txt' -exec ln -s {} profiles/ \;
+
     samestr --verbosity DEBUG \
     summarize \
         --input-dir ./ \
-        --mp-profiles-dir ./ \
+        --mp-profiles-dir ./profiles/ \
         --mp-profiles-extension .txt \
         --output-dir sstr_summarize/
     """
