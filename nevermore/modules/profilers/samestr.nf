@@ -143,7 +143,7 @@ process run_samestr_summarize {
     summarize \
         --input-dir ./ \
         --mp-profiles-dir ./ \
-        --mp-profiles-extension .profile.txt \
+        --mp-profiles-extension .txt \
         --output-dir sstr_summarize/
     """
 }
