@@ -11,9 +11,13 @@ process reduce_metaphlan_profiles {
 		"""
 		humann_reduce_table --input ${mp_collated_profiles} --output mp_${reduce_function}_reduced_profiles.txt.tmp --function ${reduce_function} --sort-by level
 		sed -i "2 s/^/#/" mp_${reduce_function}_reduced_profiles.txt.tmp
-		mv mp_${reduce_function}_reduced_profiles.txt.tmp mp_${reduce_function}_reduced_profiles.txt		
+
+		awk -v OFS='\\t' '{print \$1,\$2}' mp_${reduce_function}_reduced_profiles.txt.tmp > mp_${reduce_function}_reduced_profiles.txt
 		"""
 		// sed -i "2 s/^/xxx/" mp_${reduce_function}_reduced_profiles.txt.tmp
+		// <(awk '{print \$1"\t"\$2"\tadditional_species"}' tmp) > joint_max_taxonomic_profile.tsv
+		// mv mp_${reduce_function}_reduced_profiles.txt.tmp mp_${reduce_function}_reduced_profiles.txt		
+
 
 }
 
