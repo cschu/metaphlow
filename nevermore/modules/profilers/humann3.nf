@@ -10,6 +10,7 @@ process reduce_metaphlan_profiles {
 	script:
 		"""
 		humann_reduce_table --input ${mp_collated_profiles} --output mp_${reduce_function}_reduced_profiles.txt.tmp --function ${reduce_function} --sort-by level
+		sed -i "2 s/^/#/" mp_${reduce_function}_reduced_profiles.txt.tmp
 		mv mp_${reduce_function}_reduced_profiles.txt.tmp mp_${reduce_function}_reduced_profiles.txt		
 		"""
 		// sed -i "2 s/^/xxx/" mp_${reduce_function}_reduced_profiles.txt.tmp
