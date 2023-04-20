@@ -2,7 +2,7 @@ process reduce_metaphlan_profiles {
 
 	input:
 		path(mp_collated_profiles)
-		value(reduce_function)
+		val(reduce_function)
 	
 	output:
 		path("mp_${reduce_function}_reduced_profiles.txt"), emit: mp_reduced_profiles
