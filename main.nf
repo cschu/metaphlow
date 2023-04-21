@@ -86,7 +86,7 @@ workflow {
 
 			humann_input_ch = fastq_ch
 				.join(run_metaphlan4.out.mp4_table, remainder: false)
-				.map { sample, fastq, table -> return tuple(sample.id, fastq, table) }
+				.map { sample, fastq, table -> return tuple(sample.id, table, fastq) }
 
 			run_humann3(
 				humann_input_ch,
