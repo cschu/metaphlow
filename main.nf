@@ -91,7 +91,8 @@ workflow {
 			run_humann3(
 				humann_input_ch,
 				generate_humann_joint_index.out.joint_bt2_index,
-				generate_humann_joint_index.out.chocophlan_db
+				generate_humann_joint_index.out.chocophlan_db,
+				params.humann_prot_db
 			)
 
 		}

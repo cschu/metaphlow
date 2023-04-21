@@ -49,6 +49,7 @@ process run_humann3 {
         tuple val(sample), path(mp_profile), path(fastq_files)
         path(joint_bt2_index)
 		path(chocophlan_db)
+		path(humann_prot_db)
 
     output:
         path "humann3/${sample}/${sample}_genefamilies.tsv", emit: hm_genefamilies
@@ -64,7 +65,7 @@ process run_humann3 {
     --taxonomic-profile ${mp_profile} \
     --nucleotide-database joint_bowtie2_index \
     --bypass-nucleotide-index \
-    --protein-database ${params.humann_prot_db}  \
+    --protein-database ${humann_prot_db} \
     --input merged.fq.gz \
     --input-format fastq.gz \
     --output-basename ${sample} \
