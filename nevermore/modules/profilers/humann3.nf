@@ -60,7 +60,7 @@ process run_humann3 {
 	mkdir -p humann3/${sample}/
     cat ${fastq_files} > merged.fq.gz
 
-    humann
+    humann \
     --taxonomic-profile ${mp_profile} \
     --nucleotide-database joint_bowtie2_index \
     --bypass-nucleotide-index \
