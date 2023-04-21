@@ -75,8 +75,3 @@ process run_humann3 {
     rm merged.fq.gz
     """
 }
-    cpus 10
-    maxForks 50
-    scratch = true
-    memory { 75.GB * task.attempt }
-    time { 10.hours }
