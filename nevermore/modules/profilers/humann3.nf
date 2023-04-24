@@ -52,9 +52,9 @@ process run_humann3 {
 		path(humann_prot_db)
 
     output:
-        path "humann3/${sample}/${sample}_genefamilies.tsv", emit: hm_genefamilies
-        path "humann3/${sample}/${sample}_pathabundance.tsv", emit: hm_pathabundance
-        path "humann3/${sample}/${sample}_pathcoverage.tsv", emit: hm_pathcoverage
+        tuple val(sample), path("humann3/${sample}/${sample}_genefamilies.tsv"), emit: hm_genefamilies
+        tuple val(sample), path("humann3/${sample}/${sample}_pathabundance.tsv"), emit: hm_pathabundance
+        tuple val(sample), path("humann3/${sample}/${sample}_pathcoverage.tsv"), emit: hm_pathcoverage
 
     script:
     """
@@ -76,3 +76,28 @@ process run_humann3 {
     rm merged.fq.gz
     """
 }
+
+
+process reformat_genefamily_table {
+
+    input:
+        tuple val(sample), path(hm_table)
+
+    output:
+        path "${sample}/${sample}_genefamilies.relab_stratified.tsv", emit: hm_table_stratified
+        path "${sample}/${sample}_genefamilies.relab_unstratified.tsv", emit: hm_table_unstratified
+
+    script:
+    """
+	mkdir -p ${sample}/
+
+    humann_renorm_table \
+    --input ${hm_table} \
+    --units relab \
+    --output ${sample}/${sample}_genefamilies.relab.tsv
+
+    humann_split_stratified_table \
+    --input ${sample}/${sample}_genefamilies.relab.tsv \
+    --output ${sample}/
+    """
+}   

@@ -7,7 +7,7 @@ include { nevermore_prep_align } from "./nevermore/workflows/align"
 include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
-include { reduce_metaphlan_profiles; generate_humann_joint_index; run_humann3 } from "./nevermore/modules/profilers/humann3"
+include { reduce_metaphlan_profiles; generate_humann_joint_index; run_humann3; reformat_genefamily_table } from "./nevermore/modules/profilers/humann3"
 
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
@@ -95,6 +95,8 @@ workflow {
 				params.humann_prot_db
 			)
 
+			reformat_genefamily_table(run_humann3.out.hm_genefamilies)
+
 		}
 
 		
@@ -109,3 +111,5 @@ workflow {
 	}
 
 }
+
+
