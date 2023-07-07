@@ -52,7 +52,7 @@ workflow nevermore_simple_preprocessing {
 
 		if (params.amplicon_seq) {
 
-			qc_bbduk_stepwise_amplicon(fastq_ch, "${asset_dir}/adapters.fa") // amplicon cannot yet do bz2
+			qc_bbduk_stepwise_amplicon(fastq_ch, "${asset_dir}/adapters.fa")
 			processed_reads_ch = processed_reads_ch.concat(qc_bbduk_stepwise_amplicon.out.reads)
 			orphans_ch = orphans_ch.concat(qc_bbduk_stepwise_amplicon.out.orphans)
 
@@ -63,8 +63,9 @@ workflow nevermore_simple_preprocessing {
 			orphans_ch = qc_bbduk.out.orphans
 				.map { sample, file -> 
 					def meta = [:]
-					meta.is_paired = false
 					meta.id = sample.id + ".orphans"
+					meta.is_paired = false
+					meta.library = sample.library
 					return tuple(meta, file)
 				}
 

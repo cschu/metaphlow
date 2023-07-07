@@ -8,6 +8,10 @@ include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
 
+include { samestr } from "./nevermore/workflows/samestr"
+include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize } from "./nevermore/modules/profilers/samestr"
+
+
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
 
 if (!params.fastq_input_pattern) {
@@ -69,6 +73,54 @@ workflow {
 			.map { sample, table -> return table }
 
 		collate_metaphlan4_tables(mp4_tables_ch.collect())
+
+		if (params.run_samestr) {
+			// samestr_input_ch = run_metaphlan4.out.mp4_sam
+			// 	.join(run_metaphlan4.out.mp4_table)
+			// 	.map { sample, sam, profile -> return tuple(sam, profile) }
+			// 	.collect()
+
+			run_samestr_convert(
+				// samestr_input_ch,
+				run_metaphlan4.out.mp4_sam.map { sample, sam -> return sam},
+				run_metaphlan4.out.mp4_table.map { sample, table -> return table},
+				params.samestr_marker_db
+			)
+
+			grouped_npy_ch = run_samestr_convert.out.sstr_npy
+				.flatten()
+				.map { file ->
+						def species = file.name.replaceAll(/[.].*/, "")
+						return tuple(species, file)
+				}
+				.groupTuple(sort: true)
+            
+			run_samestr_merge(grouped_npy_ch)
+			run_samestr_filter(
+			 	run_samestr_merge.out.sstr_npy,
+			 	params.samestr_marker_db
+			)
+			run_samestr_stats(run_samestr_filter.out.sstr_npy)
+			run_samestr_compare(run_samestr_filter.out.sstr_npy)
+
+			// symlink all sstr_compare/mp_profiles
+			run_samestr_summarize(
+				run_samestr_compare.out.sstr_compare.collect(),
+				run_metaphlan4.out.mp4_table.map { sample, table -> return table}.collect()
+				// samestr_input_ch
+				// 	.map { sam, profile -> return profile }
+				// 	.collect()
+			)
+
+			// samestr(
+			// 	samestr_input_ch
+			// 	// .join(run_metaphlan4.out.mp4_table)
+			// 	// .map { sample, sam, profile ->
+			// 	// 	return tuple(sam, profile)
+			// 	// }
+			// 	// .collect()
+			// )
+		}
 
 		
 		if (params.run_metaphlan3) {

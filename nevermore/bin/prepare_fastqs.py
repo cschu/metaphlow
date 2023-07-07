@@ -110,9 +110,7 @@ def process_sample(
 	 - whether fastq files are located on remote file system
 	"""
 
-	if not fastqs:
-		...
-	elif len(fastqs) == 1:
+	if len(fastqs) == 1:
 		# remove potential "single(s)" string from single fastq file name prefix
 		sample_sub = re.sub(r"[._]singles?", "", sample)
 		# 20221018: and attach it at the end of the sample name
@@ -127,6 +125,8 @@ def process_sample(
 
 		dest = os.path.join(sample_dir, f"{sample}_R1.fastq.{dest_compression}")
 		transfer_file(fastqs[0], dest, remote_input=remote_input)
+
+		yield sample, False
 
 	elif fastqs:
 
@@ -195,6 +195,8 @@ def process_sample(
 				target_r = "R2" if r1 else "R1"
 				dest = os.path.join(sample_dir, f"{sample}_{target_r}.fastq.{dest_compression}")
 				transfer_multifiles(r2, dest, remote_input=remote_input, compression=compression)
+		
+			yield sample, bool(r1 and r2)
 
 		if others:
 			# if single-end reads exist,
@@ -202,9 +204,12 @@ def process_sample(
 			# these will be processed independently and merged with the paired-end reads
 			# at a later stage
 			sample_dir = sample_dir + ".singles"
+			sample = sample + ".singles"
 			pathlib.Path(sample_dir).mkdir(parents=True, exist_ok=True)
-			dest = os.path.join(sample_dir, f"{sample}.singles_R1.fastq.{dest_compression}")
+			dest = os.path.join(sample_dir, f"{sample}_R1.fastq.{dest_compression}")
 			transfer_multifiles(others, dest, remote_input=remote_input, compression=compression)
+
+			yield sample, bool(r1 or r2)
 		
 
 def is_fastq(f, valid_fastq_suffixes, valid_compression_suffixes):
@@ -217,13 +222,31 @@ def is_fastq(f, valid_fastq_suffixes, valid_compression_suffixes):
 	 - true if file is fastq else false
 
 	"""
-	prefix, suffix = os.path.splitext(f)
-	if suffix in valid_fastq_suffixes:
-		return True
-	if suffix in valid_compression_suffixes:
-		_, suffix = os.path.splitext(prefix)
-		return suffix in valid_fastq_suffixes
-	return False
+	filename_tokens = re.split(r"[._]", os.path.basename(f))
+	try:
+		fastq_suffix, *compression_suffix = filename_tokens[-2:]
+	except ValueError:
+		return False
+
+	valid_compression = not compression_suffix or compression_suffix[0] in valid_compression_suffixes
+
+	logger.info('OBJECT: %s FASTQ: %s COMPRESSION: %s ISFILE: %s' % (f, fastq_suffix in valid_fastq_suffixes, valid_compression, os.path.isfile(f)))
+
+	return os.path.isfile(f) and valid_compression and fastq_suffix in valid_fastq_suffixes
+
+	# if not compression_suffix:
+	# 	return fq_suffix in valid_fastq_suffixes
+	# else:
+	# 	return compression_suffix[0] in valid_compression_suffixes and fq_suffix in valid_fastq_suffixes
+
+
+	# prefix, suffix = os.path.splitext(f)
+	# if suffix in valid_fastq_suffixes:
+	# 	return True
+	# if suffix in valid_compression_suffixes:
+	# 	_, suffix = os.path.splitext(prefix)
+	# 	return suffix in valid_fastq_suffixes
+	# return False
 
 
 def main():
@@ -238,9 +261,9 @@ def main():
 
 	args = ap.parse_args()
 
-	valid_fastq_suffixes = tuple(f".{suffix}" for suffix in args.valid_fastq_suffixes.split(","))
+	valid_fastq_suffixes = tuple(f"{suffix}" for suffix in args.valid_fastq_suffixes.split(","))
 	print(valid_fastq_suffixes)
-	valid_compression_suffixes = tuple(f".{suffix}" for suffix in args.valid_compression_suffixes.split(","))
+	valid_compression_suffixes = tuple(f"{suffix}" for suffix in args.valid_compression_suffixes.split(","))
 	print(valid_compression_suffixes)
 
 	fastq_file_suffix_pattern = r"[._](" + \
@@ -255,7 +278,7 @@ def main():
 		return sorted(
 				os.path.join(input_dir, f)
 				for f in os.listdir(input_dir)
-				if is_fastq(f, valid_fastq_suffixes, valid_compression_suffixes)
+				if is_fastq(os.path.join(input_dir, f), valid_fastq_suffixes, valid_compression_suffixes)
 			)
 
 	try:
@@ -276,7 +299,7 @@ def main():
 	root_fastqs = collect_fastq_files(args.input_dir, valid_fastq_suffixes, valid_compression_suffixes)
 
 	if samples and root_fastqs:
-		raise ValueError("Found {len(root_fastqs)} fastq files in input directory together with {len(samples)} sample directories. Please check input data.")
+		raise ValueError(f"Found {len(root_fastqs)} fastq files in input directory together with {len(samples)} sample directories. Please check input data.")
 	elif root_fastqs:
 		for f in root_fastqs:
 			sample = re.sub(fastq_file_suffix_pattern, "", os.path.basename(f))
@@ -284,16 +307,19 @@ def main():
 			samples.setdefault(sample, []).append(f)
 
 	# check and transfer the files
-	for sample, fastqs in samples.items():
-		try:
-			process_sample(
-				sample, fastqs, args.output_dir,
-				fastq_file_suffix_pattern,
-				remove_suffix=args.remove_suffix, remote_input=args.remote_input
-			)
-		except Exception as e:
-			raise ValueError(f"Encountered problems processing sample '{sample}': {e}.\nPlease check your file names.")
-
+	with open("sample_library_info.txt", "wt") as lib_out:
+		for sample, fastqs in samples.items():
+			try:
+				renamed = process_sample(
+					sample, fastqs, args.output_dir,
+					fastq_file_suffix_pattern,
+					remove_suffix=args.remove_suffix, remote_input=args.remote_input
+				)
+			except Exception as e:
+				raise ValueError(f"Encountered problems processing sample '{sample}': {e}.\nPlease check your file names.")
+			else:
+				for sample, is_paired in renamed:
+					print(sample, int(is_paired), sep="\t", file=lib_out)
 
 if __name__ == "__main__":
 	main()
