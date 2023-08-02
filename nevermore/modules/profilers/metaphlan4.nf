@@ -15,7 +15,7 @@ process run_metaphlan4 {
 	def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
 
 	def samestr_params = ""
-	if (params.run_samestr) {
+	if (params.run_samestr || params.samestr_compatible_output) {
 		samestr_params = "--legacy-output -t rel_ab --samout ${sample.id}.mp4.sam.bz2"
 	}
 
