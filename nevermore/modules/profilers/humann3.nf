@@ -29,7 +29,7 @@ process generate_humann_joint_index {
 		path(nuc_db)
 
 	output:
-		path("joint_bt2_index/**.bt2"), emit: joint_bt2_index
+		path("joint_bt2_index/**.{bt2,bt2l}"), emit: joint_bt2_index
 		path("joint_bt2_index/**.ffn"), emit: chocophlan_db
 
 	script:
