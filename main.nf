@@ -7,6 +7,8 @@ include { nevermore_prep_align } from "./nevermore/workflows/align"
 include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
+include { reduce_metaphlan_profiles; generate_humann_joint_index; run_humann3; reformat_genefamily_table } from "./nevermore/modules/profilers/humann3"
+
 
 include { samestr } from "./nevermore/workflows/samestr"
 include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize } from "./nevermore/modules/profilers/samestr"
@@ -78,6 +80,32 @@ workflow {
 
 		}
 
+		if (params.run_humann3) {
+			reduce_metaphlan_profiles(
+				collate_metaphlan4_tables.out.mp4_abundance_table,
+				"max"
+			)
+
+			generate_humann_joint_index(
+				reduce_metaphlan_profiles.out.mp_reduced_profiles,
+				params.humann_nuc_db
+			)
+
+			humann_input_ch = fastq_ch
+				.join(run_metaphlan4.out.mp4_table, remainder: false)
+				.map { sample, fastq, table -> return tuple(sample.id, table, fastq) }
+
+			run_humann3(
+				humann_input_ch,
+				generate_humann_joint_index.out.joint_bt2_index,
+				generate_humann_joint_index.out.chocophlan_db,
+				params.humann_prot_db
+			)
+
+			reformat_genefamily_table(run_humann3.out.hm_genefamilies)
+      
+    }
+
 		if (params.run_samestr) {
 			// samestr_input_ch = run_metaphlan4.out.mp4_sam
 			// 	.join(run_metaphlan4.out.mp4_table)
@@ -124,6 +152,7 @@ workflow {
 			// 	// }
 			// 	// .collect()
 			// )
+
 		}
 
 		
@@ -138,3 +167,5 @@ workflow {
 	}
 
 }
+
+

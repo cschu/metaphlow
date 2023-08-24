@@ -80,7 +80,7 @@ process collate_metaphlan4_tables {
 	path(tables)
 
 	output:
-	path("metaphlan4_abundance_table.txt")
+	path("metaphlan4_abundance_table.txt"), emit: mp4_abundance_table
 
 	script:
 	"""
