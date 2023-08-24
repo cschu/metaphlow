@@ -36,6 +36,24 @@ process run_metaphlan4 {
 	"""
 }
 
+
+// process convert_mp4_to_gtdb {
+
+// 	input:
+// 	tuple val(sample), path(mp4_table)
+// 	path(mp4_db)
+
+// 	output:
+// 	tuple val(sample), path("${sample.id}.mp4.gtdb.txt"), emit: mp4_table_gtdb
+
+// 	script:
+// 	"""
+// 	sgb_to_gtdb_profile.py -i ${mp4_table}
+// 	"""
+
+// }
+
+
 process combine_metaphlan4 {
 
 	input:
