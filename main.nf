@@ -72,7 +72,11 @@ workflow {
 		mp4_tables_ch = run_metaphlan4.out.mp4_table
 			.map { sample, table -> return table }
 
-		collate_metaphlan4_tables(mp4_tables_ch.collect())
+		if (params.mp4_collate) {
+
+			collate_metaphlan4_tables(mp4_tables_ch.collect())
+
+		}
 
 		if (params.run_samestr) {
 			// samestr_input_ch = run_metaphlan4.out.mp4_sam
