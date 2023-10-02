@@ -24,7 +24,7 @@ The default supported Metaphlan version is 4. Additionally, Metaphlan3 can be ru
 
 #### CHOCOPhlAn database for Metaphlan4
 
-Get the `mpa_vOct22_CHOCOPhlAnSGB_202212` database from [http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/mpa_vOct22_CHOCOPhlAnSGB_202212.tar](here), unpack the tarball, and point the `--mp4_db` parameter to the database's root directory. 
+Get the `mpa_vOct22_CHOCOPhlAnSGB_202212` database from [here](http://cmprod1.cibio.unitn.it/biobakery4/metaphlan_databases/mpa_vOct22_CHOCOPhlAnSGB_202212.tar), unpack the tarball, and point the `--mp4_db` parameter to the database's root directory. 
 
 In `params.yml`:
 
@@ -40,7 +40,7 @@ On the command line:
 
 #### CHOCOPhlAn database for Metaphlan3 (optional)
 
-Get the `mpa_v30_CHOCOPhlAn_201901` database from [](here), unpack the tarball. Then point the `--mp3_db` parameter to the parent directory of the database's root directory and the `--mp3_db_version` parameter to the basename of the database's root directory.
+Get the `mpa_v30_CHOCOPhlAn_201901` database from [here](), unpack the tarball. Then point the `--mp3_db` parameter to the parent directory of the database's root directory and the `--mp3_db_version` parameter to the basename of the database's root directory.
 
 In `params.yml`:
 
@@ -62,7 +62,7 @@ Metaphlow supports HUMAnN3 and samestr downstream analyses.
 
 #### HUMAnN3 databases
 
-  Get the annotated CHOCOPhlAn db from [http://huttenhower.sph.harvard.edu/humann_data/chocophlan/full_chocophlan.tar.gz](here) and the annotated uniref db from [http://huttenhower.sph.harvard.edu/humann_data/uniprot/uniref_annotated/uniref50_annotated_v201901b_full.tar.gz](here), unpack the tarballs and set the respective parameters.
+  Get the annotated CHOCOPhlAn db from [here](http://huttenhower.sph.harvard.edu/humann_data/chocophlan/full_chocophlan.tar.gz) and the annotated uniref db from [here](http://huttenhower.sph.harvard.edu/humann_data/uniprot/uniref_annotated/uniref50_annotated_v201901b_full.tar.gz), unpack the tarballs and set the respective parameters.
 
   In `params.yml`:
 
