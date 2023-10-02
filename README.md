@@ -85,7 +85,7 @@ TBD
 
 ## Running Metaphlow
 
-A metaphlow run is controlled by environment-specific parameters (s. `run.config`) and studiy-specific parameters (s. `params.yml`). The parameters in the `params.yml` can be specified on the command line as well.
+A metaphlow run is controlled by environment-specific parameters (s. [run.config](config/run.config)) and studiy-specific parameters (s. [params.yml](config/params.yml)). The parameters in the `params.yml` can be specified on the command line as well.
 
 You can either clone metaphlow from GitHub and run it as follows
 
