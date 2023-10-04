@@ -102,7 +102,7 @@ nextflow run cschu/metaphlow [-resume] -c /path/to/run.config -params-file /path
 
 ### Input files
 
-Metaphlow supports fastq files. These can be uncompressed (but shouldn't) or compressed with gzip or bzip2. Sample data must be either be arranged in one directory per sample or in one global directory containing all files.
+Metaphlow supports fastq files. These can be uncompressed (but shouldn't be!) or compressed with gzip or bzip2. Sample data must be either be arranged in one directory per sample or in one global directory containing all files.
 
 #### Per-sample input directories
 
