@@ -1,92 +1,54 @@
-process run_metaphlan4 {
-	
-	input:
-	tuple val(sample), path(fastqs)
-	path(mp4_db)
+process qc_bbduk {
+	label 'bbduk'
 
-	output:
-	tuple val(sample), path("${sample.id}.mp4.txt"), emit: mp4_table
-	tuple val(sample), path("${sample.id}.mp4.sam.bz2"), emit: mp4_sam
-	// tuple val(sample), path("${sample.id}.bowtie2.bz2"), emit: mp4_bt2
-	
-	script:
-	def mp4_params = "--bowtie2db ${mp4_db} --input_type fastq --nproc ${task.cpus} --tmp_dir tmp/"
-	def mp4_input = ""
-	def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
+    input:
+    tuple val(sample), path(reads)
+	path(adapters)
 
-	def samestr_params = ""
-	if (params.run_samestr || params.samestr_compatible_output) {
-		samestr_params = "--legacy-output -t rel_ab --samout ${sample.id}.mp4.sam.bz2"
-	}
+    output:
+    tuple val(sample), path("qc_reads/${sample.id}/${sample.id}_R*.fastq.gz"), emit: reads
+    tuple val(sample), path("qc_reads/${sample.id}/${sample.id}.orphans_R1.fastq.gz"), emit: orphans, optional: true
+    path("stats/qc/bbduk/${sample.id}.bbduk_stats.txt")
+    tuple val(sample), path("qc_reads/${sample.id}/BBDUK_FINISHED"), emit: sentinel
 
-	
-	if (fastqs instanceof Collection && fastqs.size() == 2) {
-		mp4_input = "${sample.id}_R1.fastq.gz,${sample.id}_R2.fastq.gz"
-	} else if (fastqs instanceof Collection && fastqs.size() == 3) {
-		mp4_input = "${sample.id}_R1.fastq.gz,${sample.id}_R2.fastq.gz,${sample.id}.singles_R1.fastq.gz"
-	} else {
-		mp4_input = "${fastqs}"
-	}
+    script:
+    def maxmem = task.memory.toGiga()
+    def compression = (reads[0].name.endsWith("gz")) ? "gz" : "bz2"
 
-	"""
-	mkdir -p tmp/
+    def read2 = ""
+    def orphan_check = ""
 
-	metaphlan ${mp4_input} ${mp4_params} ${bt2_out} -o ${sample.id}.mp4.txt ${samestr_params}
-	touch ${sample.id}.mp4.sam.bz2
-	"""
-}
+    def bb_params = params.qc_params_shotgun
+    
+    def trim_params = "${bb_params} ref=${adapters} minlen=${params.qc_minlen}"
 
+    def orphan_filter = ""
+    
+    if (sample.is_paired) {
+        def orphans = "qc_reads/${sample.id}/${sample.id}.orphans_R1.fastq.gz"
+        read2 = "in2=${sample.id}_R2.fastq.${compression} out2=qc_reads/${sample.id}/${sample.id}_R2.fastq.gz outs=tmp_orphans.fq"
+        orphan_filter = "bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} in=tmp_orphans.fq out=${orphans}"
 
-// process convert_mp4_to_gtdb {
+        orphan_check = """
+        if [[ -z "\$(gzip -dc ${orphans} | head -n 1)" ]]; then
+			rm ${orphans}
+		fi
+        """
+    }
 
-// 	input:
-// 	tuple val(sample), path(mp4_table)
-// 	path(mp4_db)
+    def read1 = "in1=${sample.id}_R1.fastq.${compression} out1=qc_reads/${sample.id}/${sample.id}_R1.fastq.gz"
+    
+    def stats_out = "stats=stats/qc/bbduk/${sample.id}.bbduk_stats.txt"
 
-// 	output:
-// 	tuple val(sample), path("${sample.id}.mp4.gtdb.txt"), emit: mp4_table_gtdb
+    """
+    set -e -o pipefail
 
-// 	script:
-// 	"""
-// 	sgb_to_gtdb_profile.py -i ${mp4_table}
-// 	"""
+    mkdir -p qc_reads/${sample.id}/ stats/qc/bbduk/
+    bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} ${stats_out} ${read1} ${read2}
+    ${orphan_filter}
+    ${orphan_check}
 
-// }
-
-
-process combine_metaphlan4 {
-
-	input:
-	tuple val(sample), path(bt2)
-
-	output:
-	tuple val(sample), path("metaphlan4/${sample.id}/${sample.id}.mp4.txt"), emit: mp4_table
-
-	script:
-	def mp4_params = "--input_type bowtie2out --nproc ${task.cpus} --tmp_dir tmp/"
-	def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
-	def mp4_input = "${sample.id}.bowtie2.bz2,${sample.id}.singles.bowtie2.bz2"
-	"""
-	mkdir -p metaphlan4/${sample.id}/
-
-	metaphlan ${mp4_input} ${mp4_params} -o metaphlan4/${sample.id}/${sample.id}.mp4.txt
-	"""
-}
-
-
-process collate_metaphlan4_tables {
-
-	input:
-	path(tables)
-
-	output:
-	path("metaphlan4_abundance_table.txt"), emit: mp4_abundance_table
-
-	script:
-	"""
-	mkdir -p metaphlan4/
-
-	merge_metaphlan_tables.py ${tables} > metaphlan4_abundance_table.txt
-	"""
-
+    touch qc_reads/${sample.id}/BBDUK_FINISHED
+    rm -vf *.fq
+    """
 }
