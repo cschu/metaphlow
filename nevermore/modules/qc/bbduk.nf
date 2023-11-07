@@ -17,10 +17,18 @@ process qc_bbduk {
 
     def read2 = ""
     def orphan_check = ""
+
+    def bb_params = params.qc_params_shotgun
+    
+    def trim_params = "${bb_params} ref=${adapters} minlen=${params.qc_minlen}"
+
+    def orphan_filter = ""
     
     if (sample.is_paired) {
         def orphans = "qc_reads/${sample.id}/${sample.id}.orphans_R1.fastq.gz"
-        read2 = "in2=${sample.id}_R2.fastq.${compression} out2=qc_reads/${sample.id}/${sample.id}_R2.fastq.gz outs=${orphans}"
+        read2 = "in2=${sample.id}_R2.fastq.${compression} out2=qc_reads/${sample.id}/${sample.id}_R2.fastq.gz outs=tmp_orphans.fq"
+        orphan_filter = "bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} in=tmp_orphans.fq out=${orphans}"
+
         orphan_check = """
         if [[ -z "\$(gzip -dc ${orphans} | head -n 1)" ]]; then
 			rm ${orphans}
@@ -30,7 +38,6 @@ process qc_bbduk {
 
     def read1 = "in1=${sample.id}_R1.fastq.${compression} out1=qc_reads/${sample.id}/${sample.id}_R1.fastq.gz"
     
-    def trim_params = params.qc_params_shotgun + " ref=${adapters} minlen=${params.qc_minlen}"
     def stats_out = "stats=stats/qc/bbduk/${sample.id}.bbduk_stats.txt"
 
     """
@@ -38,8 +45,10 @@ process qc_bbduk {
 
     mkdir -p qc_reads/${sample.id}/ stats/qc/bbduk/
     bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} ${stats_out} ${read1} ${read2}
+    ${orphan_filter}
     ${orphan_check}
 
     touch qc_reads/${sample.id}/BBDUK_FINISHED
+    rm -vf *.fq
     """
 }
