@@ -16,7 +16,7 @@ process run_metaphlan4 {
 
 	def samestr_params = ""
 	if (params.run_samestr || params.samestr_compatible_output) {
-		samestr_params = "--legacy-output -t rel_ab --samout ${sample.id}.mp4.sam.bz2"
+		samestr_params = "--samout ${sample.id}.mp4.sam.bz2"
 	}
 
 	
