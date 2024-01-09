@@ -12,7 +12,6 @@ process run_samestr_convert {
     """
     samestr --verbosity DEBUG \
     convert \
-        --input-dir . \
         --input-files ${mp_sam} \
         --min-vcov 1 \
         --min-aln-qual 0 \
