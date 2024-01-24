@@ -85,7 +85,7 @@ workflow nevermore_main {
 			}
 		}
 
-		if (do_preprocessing) {
+		if (params.run_qa && do_preprocessing) {
 			collate_stats(collate_ch.collect())
 		}
 
