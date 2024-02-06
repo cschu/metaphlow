@@ -98,6 +98,7 @@ def process_sample(
 	sample, fastqs, output_dir,
 	fastq_suffix_pattern,
 	remove_suffix=None, remote_input=False,
+	add_suffix=None,
 ):
 	""" Checks if a set of fastq files in a directory is a valid collection
 	and transfers files to a destination dir upon success.
@@ -117,7 +118,10 @@ def process_sample(
 		# - this might be a temporary fix, but @93a73d0
 		# single-end samples without .singles-suffix cause problems 
 		# with fastqc results in the collate step
+		if add_suffix:
+			sample_sub += f".{add_suffix}"
 		sample = sample_sub + ".singles"
+
 		sample_dir = os.path.join(output_dir, sample)
 		pathlib.Path(sample_dir).mkdir(parents=True, exist_ok=True)
 
@@ -131,15 +135,20 @@ def process_sample(
 	elif fastqs:
 
 		# check if all fastq files are compressed the same way
+		# suffixes-counter will have True/False counts for compressed/uncompressed
+		# if True only - all files are compressed
+		# if False only - all files are uncompressed
 		suffixes = Counter(
 			f[f.rfind("."):] in (".gz", ".bz2") for f in fastqs
 		)
 
+		# mix -> error out
 		if len(suffixes) > 1:
 			raise ValueError(f"sample: {sample} has mixed compressed and uncompressed input files. Please check.")
 
-		if suffixes.most_common()[0][0]:
-			# all compressed
+		all_compressed, _ = suffixes.most_common()[0]
+		
+		if all_compressed:
 			suffixes = Counter(
 				f[f.rfind(".") + 1:] for f in fastqs
 			)
@@ -178,6 +187,9 @@ def process_sample(
 		print("R1", r1, file=sys.stderr)
 		print("R2", r2, file=sys.stderr)
 		print("others", others, file=sys.stderr, flush=True)
+
+		if add_suffix:
+			sample += f".{add_suffix}"
 
 		sample_dir = os.path.join(output_dir, sample)
 
@@ -222,17 +234,24 @@ def is_fastq(f, valid_fastq_suffixes, valid_compression_suffixes):
 	 - true if file is fastq else false
 
 	"""
-	filename_tokens = re.split(r"[._]", os.path.basename(f))
-	try:
-		fastq_suffix, *compression_suffix = filename_tokens[-2:]
-	except ValueError:
-		return False
+	file_extensions = re.split(r"[._]", os.path.basename(f))[-2:]
+	# try:
+	# 	fastq_suffix, *compression_suffix = filename_tokens[-2:]
+	# except ValueError:
+	# 	return False
+	valid_compression = len(file_extensions) == 2 and file_extensions[-1] in valid_compression_suffixes
+	valid_fastq = any(
+        (
+            valid_compression and file_extensions[0] in valid_fastq_suffixes,
+            file_extensions and file_extensions[-1] in valid_fastq_suffixes,
+        )
+    )
 
-	valid_compression = not compression_suffix or compression_suffix[0] in valid_compression_suffixes
+	# valid_compression = not compression_suffix or compression_suffix[0] in valid_compression_suffixes
 
-	logger.info('OBJECT: %s FASTQ: %s COMPRESSION: %s ISFILE: %s' % (f, fastq_suffix in valid_fastq_suffixes, valid_compression, os.path.isfile(f)))
+	logger.info('OBJECT: %s FASTQ: %s COMPRESSION: %s ISFILE: %s' % (f, valid_fastq, valid_compression, os.path.isfile(f)))
 
-	return os.path.isfile(f) and valid_compression and fastq_suffix in valid_fastq_suffixes
+	return os.path.isfile(f) and valid_fastq
 
 	# if not compression_suffix:
 	# 	return fq_suffix in valid_fastq_suffixes
@@ -258,6 +277,7 @@ def main():
 	ap.add_argument("--remove-suffix", type=str, default=None)
 	ap.add_argument("--valid-fastq-suffixes", type=str, default="fastq,fq")
 	ap.add_argument("--valid-compression-suffixes", type=str, default="gz,bz2")
+	ap.add_argument("--add_sample_suffix", type=str)
 
 	args = ap.parse_args()
 
@@ -313,7 +333,8 @@ def main():
 				renamed = process_sample(
 					sample, fastqs, args.output_dir,
 					fastq_file_suffix_pattern,
-					remove_suffix=args.remove_suffix, remote_input=args.remote_input
+					remove_suffix=args.remove_suffix, remote_input=args.remote_input,
+					add_suffix=args.add_sample_suffix,
 				)
 			except Exception as e:
 				raise ValueError(f"Encountered problems processing sample '{sample}': {e}.\nPlease check your file names.")
