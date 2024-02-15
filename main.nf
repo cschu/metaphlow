@@ -28,7 +28,7 @@ workflow {
 	fastq_input(
 		// Channel.fromPath(fastq_input_pattern)
 		Channel.fromPath(input_dir + "/*", type: "dir"),
-		null
+		Channel.of(null)
 	)
 	
 	fastq_ch = fastq_input.out.fastqs
