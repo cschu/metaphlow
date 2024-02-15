@@ -1,15 +1,17 @@
 process run_samestr_convert {
     
     input:
-		path(mp_sam)
-        	path(mp_profile)
+		tuple val(sample), path(mp_sam), path(mp_profile)
 		path(marker_db)
 
     output:
-        path("sstr_convert/*/*.npz"), emit: sstr_npy
+        tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
+        tuple val(sample), path("samestr_convert_DONE"), emit: convert_sentinel
 
     script:
     """
+    set -e -o pipefail
+
     samestr --verbosity DEBUG \
     convert \
         --input-files ${mp_sam} \
@@ -19,6 +21,8 @@ process run_samestr_convert {
         --output-dir sstr_convert/ \
         --nprocs ${task.cpus} \
         --tax-profiles-extension .txt
+
+    touch samestr_convert_DONE
     """
 }
 
