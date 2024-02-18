@@ -18,11 +18,14 @@ process run_metaphlan4 {
 		samestr_params = "--samout ${sample.id}.mp4.sam.bz2"
 	}
 
-	r1_files = fastqs.findAll( { it.name.endsWith("_R1.fastq.gz") && !it.name.matches("(.*)(singles|orphans|chimeras)(.*)") } )
-	r2_files = fastqs.findAll( { it.name.endsWith("_R2.fastq.gz") } )
-	orphans = fastqs.findAll( { it.name.matches("(.*)(singles|orphans|chimeras)(.*)") } )
+	// def r1_files = fastqs.findAll( { it.name.endsWith("_R1.fastq.gz") && !it.name.matches("(.*)(singles|orphans|chimeras)(.*)") } )
+	// def r2_files = fastqs.findAll( { it.name.endsWith("_R2.fastq.gz") } )
+	// def orphans = fastqs.findAll( { it.name.matches("(.*)(singles|orphans|chimeras)(.*)") } )
 
-	def input_files = r1_files + r2_files + orphans
+	def input_files = []  //r1_files + r2_files + orphans
+	input_files += fastqs.findAll( { it.name.endsWith("_R1.fastq.gz") && !it.name.matches("(.*)(singles|orphans|chimeras)(.*)") } )
+	input_files += fastqs.findAll( { it.name.endsWith("_R2.fastq.gz") } )
+	input_files += fastqs.findAll( { it.name.matches("(.*)(singles|orphans|chimeras)(.*)") } )
 	def mp4_input = input_files.join(',')
 
 
