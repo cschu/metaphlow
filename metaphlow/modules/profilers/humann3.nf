@@ -55,6 +55,10 @@ process run_humann3 {
         tuple val(sample), path("humann3/${sample}/${sample}_genefamilies.tsv"), emit: hm_genefamilies
         tuple val(sample), path("humann3/${sample}/${sample}_pathabundance.tsv"), emit: hm_pathabundance
         tuple val(sample), path("humann3/${sample}/${sample}_pathcoverage.tsv"), emit: hm_pathcoverage
+        tuple val(sample), path("humann3/${sample}/${sample}_genefamilies.relab.tsv"), emit: hm_genefamilies_relab
+        tuple val(sample), path("humann3/${sample}/${sample}_pathabundance.relab.tsv"), emit: hm_pathabundance_relab
+        tuple val(sample), path "humann3/${sample}/${sample}_genefamilies.relab_stratified.tsv", emit: hm_table_stratified
+        tuple val(sample), path "humann3/${sample}/${sample}_genefamilies.relab_unstratified.tsv", emit: hm_table_unstratified
 
     script:
     """
@@ -73,6 +77,13 @@ process run_humann3 {
     --threads ${task.cpus} \
     --remove-temp-output
 
+    humann_renorm_table -i humann3/${sample}/${sample}_pathabundance.tsv -u relab -m community -s y -o humann3/${sample}/${sample}_pathabundance.relab.tsv
+    humann_renorm_table -i humann3/${sample}/${sample}_genefamilies.tsv -u relab -m community -s y -o humann3/${sample}/${sample}_genefamilies.relab.tsv
+
+    humann_split_stratified_table \
+    --input humann3/${sample}/${sample}_genefamilies.relab.tsv \
+    --output humann3/${sample}/
+
     rm merged.fq.gz
     """
 }
@@ -84,17 +95,17 @@ process reformat_genefamily_table {
         tuple val(sample), path(hm_table)
 
     output:
-        path "${sample}/${sample}_genefamilies.relab_stratified.tsv", emit: hm_table_stratified
-        path "${sample}/${sample}_genefamilies.relab_unstratified.tsv", emit: hm_table_unstratified
+        path "humann3/${sample}/${sample}_genefamilies.relab_stratified.tsv", emit: hm_table_stratified
+        path "humann3/${sample}/${sample}_genefamilies.relab_unstratified.tsv", emit: hm_table_unstratified
 
     script:
     """
-	mkdir -p ${sample}/
+	mkdir -p humann3/${sample}/
 
     humann_renorm_table \
     --input ${hm_table} \
     --units relab \
-    --output ${sample}/${sample}_genefamilies.relab.tsv
+    --output humann3/${sample}/${sample}_genefamilies.relab.tsv
 
     humann_split_stratified_table \
     --input ${sample}/${sample}_genefamilies.relab.tsv \
