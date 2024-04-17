@@ -118,12 +118,7 @@ workflow fastq_input {
 				meta.is_paired = (files instanceof Collection && files.size() == 2)
 				meta.library = (library_is_paired == "1") ? "paired" : "single"
 				return tuple(meta, files)
-				// classify_sample_with_library_info(it[0], it[2], it[1]) 
 			}
-
-
-
-		// fastq_ch.view()
 
 	emit:
 		fastqs = fastq_ch
@@ -147,11 +142,14 @@ workflow bam_input {
 			.groupTuple(sort: true)
 			.map { classify_sample(it[0], it[1]) }
 
+		fastq_ch = Channel.empty()
 		if (params.do_bam2fq_conversion) {
 			bam2fq(bam_ch)
-			bam_ch = bam2fq.out.reads
+			fastq_ch = bam2fq.out.reads
 				.map { classify_sample(it[0].id, it[1]) }
 		}
 	emit:
 		bamfiles = bam_ch
+		fastqs = fastq_ch
 }
+

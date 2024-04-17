@@ -3,7 +3,6 @@
 nextflow.enable.dsl=2
 
 include { nevermore_main } from "./nevermore/workflows/nevermore"
-include { nevermore_prep_align } from "./nevermore/workflows/align"
 include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
@@ -28,9 +27,7 @@ workflow {
 		Channel.of(null)
 	)
 	
-	fastq_ch = fastq_input.out.fastqs
-
-	nevermore_main(fastq_ch)
+	nevermore_main(fastq_input.out.fastqs)
 
 	fastq_ch = nevermore_main.out.fastqs
 	
