@@ -57,8 +57,8 @@ process run_humann3 {
         tuple val(sample), path("humann3/${sample}/${sample}_pathcoverage.tsv"), emit: hm_pathcoverage
         tuple val(sample), path("humann3/${sample}/${sample}_genefamilies.relab.tsv"), emit: hm_genefamilies_relab
         tuple val(sample), path("humann3/${sample}/${sample}_pathabundance.relab.tsv"), emit: hm_pathabundance_relab
-        tuple val(sample), path "humann3/${sample}/${sample}_genefamilies.relab_stratified.tsv", emit: hm_table_stratified
-        tuple val(sample), path "humann3/${sample}/${sample}_genefamilies.relab_unstratified.tsv", emit: hm_table_unstratified
+        tuple val(sample), path("humann3/${sample}/${sample}_genefamilies.relab_stratified.tsv"), emit: hm_table_stratified
+        tuple val(sample), path("humann3/${sample}/${sample}_genefamilies.relab_unstratified.tsv"), emit: hm_table_unstratified
 
     script:
     """
