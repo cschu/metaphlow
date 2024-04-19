@@ -10,7 +10,7 @@ workflow humann3 {
 
 	main:
 		reduce_metaphlan_profiles(
-			mp4_abundance_table
+			mp4_abundance_table,
 			"max"
 		)
 
