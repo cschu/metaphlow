@@ -1,5 +1,6 @@
 process run_samestr_convert {
     container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    tag "${sample.id}"
     
     input:
 		tuple val(sample), path(mp_sam), path(mp_profile)
@@ -29,6 +30,7 @@ process run_samestr_convert {
 
 process run_samestr_merge {
     container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    tag "${species}"
     
     input:
         tuple val(species), path(sstr_npy)
@@ -55,6 +57,7 @@ process run_samestr_merge {
 
 process run_samestr_filter {
     container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    tag "${species}"
     
     input:
         tuple val(species), path(sstr_npy), path(sstr_names)
@@ -91,6 +94,7 @@ process run_samestr_filter {
 
 process run_samestr_stats {
     container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    tag "${species}"
     
     input:
         tuple val(species), path(sstr_npy), path(sstr_names)
@@ -113,6 +117,7 @@ process run_samestr_stats {
 
 process run_samestr_compare {
     container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    tag "${species}"
     
     input:
         tuple val(species), path(sstr_npy), path(sstr_names)

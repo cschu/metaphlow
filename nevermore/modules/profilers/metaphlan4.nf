@@ -1,5 +1,6 @@
 process run_metaphlan4 {
 	container "docker://quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0"
+	tag "${sample.id}"
 	
 	input:
 	tuple val(sample), path(fastqs)
