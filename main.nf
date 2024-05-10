@@ -26,6 +26,12 @@ workflow {
 		Channel.fromPath(input_dir + "/*", type: "dir"),
 		Channel.of(null)
 	)
+
+	if (params.ignore_samples) {
+		ignore_samples = params.ignore_samples.split(",")
+		fastq_input = fastq_input
+			.filter { !ignore_samples.contains(it[0].id) }
+	}
 	
 	nevermore_main(fastq_input.out.fastqs)
 
