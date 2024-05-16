@@ -31,6 +31,7 @@ workflow {
 
 	if (params.ignore_samples) {
 		ignore_samples = params.ignore_samples.split(",")
+		print ignore_samples
 		fastq_input_ch = fastq_input_ch
 			.filter { !ignore_samples.contains(it[0].id) }
 	}
