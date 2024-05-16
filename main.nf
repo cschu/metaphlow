@@ -36,6 +36,7 @@ workflow {
 			.filter { !ignore_samples.contains(it[0].id) }
 	}
 	
+	fastq_input_ch.dump(pretty: true, tag: "fastq_input_ch")
 	nevermore_main(fastq_input_ch)
 
 	fastq_ch = nevermore_main.out.fastqs
