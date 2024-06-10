@@ -1,5 +1,5 @@
 process run_samestr_convert {
-    container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${sample.id}"
     
     input:
@@ -29,7 +29,7 @@ process run_samestr_convert {
 }
 
 process run_samestr_merge {
-    container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     
     input:
@@ -56,7 +56,7 @@ process run_samestr_merge {
 }
 
 process run_samestr_filter {
-    container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     
     input:
@@ -93,7 +93,7 @@ process run_samestr_filter {
 }
 
 process run_samestr_stats {
-    container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     
     input:
@@ -116,7 +116,7 @@ process run_samestr_stats {
 }
 
 process run_samestr_compare {
-    container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     
     input:
@@ -143,7 +143,7 @@ process run_samestr_compare {
 }
 
 process run_samestr_summarize {
-    container "docker://registry.git.embl.de/schudoma/samestr-docker:latest"
+    container "registry.git.embl.de/schudoma/samestr-docker:latest"
     
     input:
         path(sstr_data)

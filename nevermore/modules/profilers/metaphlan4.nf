@@ -1,5 +1,5 @@
 process run_metaphlan4 {
-	container "docker://quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0"
+	container "quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0"
 	tag "${sample.id}"
 	
 	input:
@@ -79,7 +79,7 @@ process run_metaphlan4 {
 
 
 process combine_metaphlan4 {
-	container "docker://quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0"
+	container "quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0"
 
 	input:
 	tuple val(sample), path(bt2)
@@ -100,7 +100,7 @@ process combine_metaphlan4 {
 
 
 process collate_metaphlan4_tables {
-	container "docker://quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0"
+	container "quay.io/biocontainers/metaphlan:4.1.0--pyhca03a8a_0"
 
 	input:
 	path(tables)
