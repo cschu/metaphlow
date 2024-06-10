@@ -62,7 +62,7 @@ Metaphlow supports HUMAnN3 and samestr downstream analyses.
 
 #### HUMAnN3 databases
 
-  Get the annotated CHOCOPhlAn db from [here](http://huttenhower.sph.harvard.edu/humann_data/chocophlan/full_chocophlan.tar.gz) and the annotated uniref db from [here](http://huttenhower.sph.harvard.edu/humann_data/uniprot/uniref_annotated/uniref50_annotated_v201901b_full.tar.gz), unpack the tarballs and set the respective parameters.
+  Get the annotated CHOCOPhlAn db from [here](http://huttenhower.sph.harvard.edu/humann_data/chocophlan/full_chocophlan.v201901_v31.tar.gz) and the annotated uniref db from [here](http://huttenhower.sph.harvard.edu/humann_data/uniprot/uniref_annotated/uniref50_annotated_v201901b_full.tar.gz), unpack the tarballs and set the respective parameters.
 
   In `params.yml`:
 
