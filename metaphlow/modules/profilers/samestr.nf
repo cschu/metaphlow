@@ -2,6 +2,8 @@ process run_samestr_convert {
     container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${sample.id}"
     label "samestr"
+    label "process_high_memory"
+
     
     input:
 		tuple val(sample), path(mp_sam), path(mp_profile)
@@ -30,9 +32,11 @@ process run_samestr_convert {
 }
 
 process run_samestr_merge {
+    publishDir params.output_dir, mode: "copy"
     container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     label "samestr"
+    label "process_high_memory"
     
     input:
         tuple val(species), path(sstr_npy)
@@ -61,6 +65,7 @@ process run_samestr_filter {
     container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     label "samestr"
+    label "process_high_memory"
     
     input:
         tuple val(species), path(sstr_npy), path(sstr_names)
@@ -96,9 +101,11 @@ process run_samestr_filter {
 }
 
 process run_samestr_stats {
+    publishDir params.output_dir, mode: "copy"
     container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     label "samestr"
+    label "process_high_memory"
     
     input:
         tuple val(species), path(sstr_npy), path(sstr_names)
@@ -120,9 +127,11 @@ process run_samestr_stats {
 }
 
 process run_samestr_compare {
+    publishDir params.output_dir, mode: "copy"
     container "registry.git.embl.de/schudoma/samestr-docker:latest"
     tag "${species}"
     label "samestr"
+    label "process_high_memory"
     
     input:
         tuple val(species), path(sstr_npy), path(sstr_names)
@@ -148,8 +157,10 @@ process run_samestr_compare {
 }
 
 process run_samestr_summarize {
+    publishDir params.output_dir, mode: "copy"
     container "registry.git.embl.de/schudoma/samestr-docker:latest"
     label "samestr"
+    label "process_high_memory"
     
     input:
         path(sstr_data)
