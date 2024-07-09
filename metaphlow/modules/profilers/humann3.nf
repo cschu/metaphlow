@@ -1,7 +1,7 @@
 process reduce_metaphlan_profiles {
     container = "registry.git.embl.de/schudoma/humann3-docker:latest"
     label "humann3"
-    process "medium"
+    label "medium"
 
 	input:
 		path(mp_collated_profiles)
