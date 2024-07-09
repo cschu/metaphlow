@@ -97,7 +97,14 @@ workflow {
 			}
 			.groupTuple(sort: true)
 
-		samestr_without_convert(ss_converted)        
+		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+			.map { file ->
+				def meta = [:]
+				meta.id = file.name.replaceAll(/\.txt$/, "")
+				return tuple(meta, file)
+			}
+
+		samestr_without_convert(ss_converted, mp4_tables)        
 
 	}
 

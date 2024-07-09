@@ -6,6 +6,7 @@ params.samestr_marker_db = "/scratch/schudoma/databases/samestr/mpa_vOct22_CHOCO
 workflow samestr_without_convert {
 	take:
 		ss_converted
+		mp4_tables
 	main:
 		// grouped_npy_ch = run_samestr_convert.out.sstr_npy
 		// 	.join(run_samestr_convert.out.convert_sentinel, by: 0)
@@ -59,7 +60,7 @@ workflow samestr_full {
 			.groupTuple(sort: true)
 
 		if (!params.stop_after_convert) {
-			samestr_without_convert(grouped_npy_ch)
+			samestr_without_convert(grouped_npy_ch, mp4_tables)
 		}
             
 		// run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
