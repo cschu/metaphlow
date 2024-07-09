@@ -58,7 +58,9 @@ workflow samestr_full {
 			}
 			.groupTuple(sort: true)
 
-		samestr_without_convert(grouped_npy_ch)
+		if (!params.stop_after_convert) {
+			samestr_without_convert(grouped_npy_ch)
+		}
             
 		// run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
 		// run_samestr_filter(
