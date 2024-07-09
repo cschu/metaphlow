@@ -3,6 +3,7 @@ process run_samestr_convert {
     tag "${sample.id}"
     label "samestr"
     label "process_high_memory"
+    cpus 12
 
     
     input:
@@ -37,6 +38,7 @@ process run_samestr_merge {
     tag "${species}"
     label "samestr"
     label "process_high_memory"
+    cpus 12 
     
     input:
         tuple val(species), path(sstr_npy)
