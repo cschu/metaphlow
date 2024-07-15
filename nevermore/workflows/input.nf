@@ -101,29 +101,29 @@ workflow fastq_input {
 		prepare_fastqs(fastq_ch, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 		prepare_fastqs.out.fastqs.dump(pretty: true, tag: "prepare_fastqs_out")
 
-		library_info_ch = prepare_fastqs.out.library_info
-			.splitCsv(header:false, sep:'\t', strip:true)
-			.map { row -> 
-				return tuple(row[0], row[1])
-			}
-			// .collect()
+		// library_info_ch = prepare_fastqs.out.library_info
+		// 	.splitCsv(header:false, sep:'\t', strip:true)
+		// 	.map { row -> 
+		// 		return tuple(row[0], row[1])
+		// 	}
+		// 	// .collect()
 
 		prepped_fastq_ch = prepare_fastqs.out.fastqs
-			.collect()
-			.flatten()
-			.map { file -> 
-				def sample = file.getParent().getName()
-				return tuple(sample, file)
-			}
-			.groupTuple(sort: true)
-			.join(library_info_ch, remainder: true)
-			.map { sample_id, files, library_is_paired ->
-				def meta = [:]
-				meta.id = sample_id
-				meta.is_paired = (files instanceof Collection && files.size() == 2)
-				meta.library = (library_is_paired == "1") ? "paired" : "single"
-				return tuple(meta, files)
-			}
+		// 	.collect()
+		// 	.flatten()
+		// 	.map { file -> 
+		// 		def sample = file.getParent().getName()
+		// 		return tuple(sample, file)
+		// 	}
+		// 	.groupTuple(sort: true)
+		// 	.join(library_info_ch, remainder: true)
+		// 	.map { sample_id, files, library_is_paired ->
+		// 		def meta = [:]
+		// 		meta.id = sample_id
+		// 		meta.is_paired = (files instanceof Collection && files.size() == 2)
+		// 		meta.library = (library_is_paired == "1") ? "paired" : "single"
+		// 		return tuple(meta, files)
+		// 	}
 
 	emit:
 		fastqs = prepped_fastq_ch
