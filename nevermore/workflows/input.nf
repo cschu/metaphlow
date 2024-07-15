@@ -98,6 +98,7 @@ workflow fastq_input {
 	main:
 		fastq_ch = fastq_ch
 			.collect()
+			.buffer(size: 1)
 			
 
 
