@@ -23,7 +23,7 @@ params.skip_alignment = true
 workflow {
 
 	fastq_input(
-		Channel.fromPath(input_dir + "/*", type: "dir"),
+		Channel.fromPath(input_dir + "/**"), // type: "dir"),
 		Channel.of(null)
 	)
 

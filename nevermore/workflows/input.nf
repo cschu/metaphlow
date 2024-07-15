@@ -38,9 +38,7 @@ process transfer_bams {
 process prepare_fastqs {
 
 	input:
-		tuple val(sample), path(files)
-		val(remote_input)
-		val(library_suffix)
+		tuple val(sample), path(files), val(remote_input), val(library_suffix)
 	output:
 		path("fastq/*/*.fastq.{gz,bz2}"), emit: fastqs
 		path("sample_library_info.txt"), emit: library_info
@@ -96,17 +94,25 @@ workflow fastq_input {
 		libsfx
 	
 	main:
-		fastq_ch = fastq_ch
-			.collect()
-			.buffer(size: 1)
+		xfastq_ch = fastq_ch
+			.map { file -> return tuple(file.getParent().getName(), file) }
+			.groupTuple(by: 0)
+			// .map { id, files -> return tuple(id, files, (params.remote_input_dir != null || params.remote_input_dir), null) } //libsfx.first()) }
+			// .map { id, files -> return tuple(id, files, (params.remote_input_dir != null || params.remote_input_dir)) }
+			.combine(libsfx)
+			.map { id, files, suffix -> return tuple(id, files, (params.remote_input_dir != null || params.remote_input_dir), suffix) }
+			//.collect()
+			//.flatten()
+			//.map { dir -> return tuple(dir.getName(), dir) }
+			//.buffer(size: 1)
 			
 
 
 
 			// .map { dir -> return tuple(dir.getName(), dir) }
-		fastq_ch.dump(pretty: true, tag: "fastq_ch")
+		xfastq_ch.dump(pretty: true, tag: "fastq_ch")
 		// prepare_fastqs(fastq_ch.collect(), (params.remote_input_dir != null || params.remote_input_dir), libsfx)
-		prepare_fastqs(fastq_ch, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
+		prepare_fastqs(xfastq_ch) //, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 		// prepare_fastqs(fastq_ch.buffer(size: 1).map { buffer -> return buffer[0] }, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 		// prepare_fastqs.out.fastqs.dump(pretty: true, tag: "prepare_fastqs_out")
 
