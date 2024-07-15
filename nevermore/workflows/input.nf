@@ -97,6 +97,7 @@ workflow fastq_input {
 	
 	main:
 		// prepare_fastqs(fastq_ch.collect(), (params.remote_input_dir != null || params.remote_input_dir), libsfx)
+		fastq_ch.dump(pretty: true, tag: "fastq_ch")
 		prepare_fastqs(fastq_ch, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 
 		library_info_ch = prepare_fastqs.out.library_info
