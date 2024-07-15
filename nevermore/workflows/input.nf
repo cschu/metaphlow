@@ -108,6 +108,7 @@ workflow fastq_input {
 			// .collect()
 
 		fastq_ch = prepare_fastqs.out.fastqs
+			.collect()
 			.flatten()
 			.map { file -> 
 				def sample = file.getParent().getName()
