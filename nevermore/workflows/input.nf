@@ -104,7 +104,7 @@ workflow fastq_input {
 			.map { row -> 
 				return tuple(row[0], row[1])
 			}
-			.collect()
+			// .collect()
 
 		fastq_ch = prepare_fastqs.out.fastqs
 			.flatten()
