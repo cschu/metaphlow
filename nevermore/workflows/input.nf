@@ -115,11 +115,11 @@ workflow fastq_input {
 
 		prepped_fastq_ch = prepare_fastqs.out.fastqs
 			// .flatten()
-			// .map { file -> 
-			// 	def sample = file.getParent().getName()
-			// 	return tuple(sample, file)
-			// }
-			// .groupTuple(sort: true, size: 3, remainder: true)
+			.map { file -> 
+			 	def sample = file.getParent().getName()
+			 	return tuple(sample, file)
+			}
+			.groupTuple(sort: true, size: 3, remainder: true)
 			.join(by: 0, library_info_ch, remainder: true)
 			.map { sample_id, files, library_is_paired ->
 				def meta = [:]
