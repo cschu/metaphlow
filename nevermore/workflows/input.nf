@@ -40,7 +40,7 @@ process prepare_fastqs {
 	input:
 		tuple val(sample), path(files), val(remote_input), val(library_suffix)
 	output:
-		path("fastq/*/*.fastq.{gz,bz2}"), emit: fastqs
+		tuple val(sample), path("fastq/*/*.fastq.{gz,bz2}"), emit: fastqs
 		path("sample_library_info.txt"), emit: library_info
 
   script:
@@ -112,13 +112,13 @@ workflow fastq_input {
 		// 	// .collect()
 
 		prepped_fastq_ch = prepare_fastqs.out.fastqs
-			.flatten()
-			.map { file -> 
-				def sample = file.getParent().getName()
-				return tuple(sample, file)
-			}
-			.groupTuple(sort: true, size: 3, remainder: true)
-			.join(library_info_ch, remainder: true)
+			// .flatten()
+			// .map { file -> 
+			// 	def sample = file.getParent().getName()
+			// 	return tuple(sample, file)
+			// }
+			// .groupTuple(sort: true, size: 3, remainder: true)
+			.join(by: 0, library_info_ch, remainder: true)
 			.map { sample_id, files, library_is_paired ->
 				def meta = [:]
 				meta.id = sample_id
