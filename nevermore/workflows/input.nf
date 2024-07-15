@@ -100,7 +100,7 @@ workflow fastq_input {
 			.map { dir -> return tuple(dir.getName(), dir) }
 		// prepare_fastqs(fastq_ch.collect(), (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 		fastq_ch.dump(pretty: true, tag: "fastq_ch")
-		prepare_fastqs(fastq_ch, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
+		prepare_fastqs(fastq_ch.buffer(size: 1), (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 		prepare_fastqs.out.fastqs.dump(pretty: true, tag: "prepare_fastqs_out")
 
 		// library_info_ch = prepare_fastqs.out.library_info
