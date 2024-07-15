@@ -37,58 +37,58 @@ workflow {
 	}
 	
 	fastq_input_ch.dump(pretty: true, tag: "fastq_input_ch")
-	nevermore_main(fastq_input_ch)
+	// nevermore_main(fastq_input_ch)
 
-	fastq_ch = nevermore_main.out.fastqs
+	// fastq_ch = nevermore_main.out.fastqs
 	
-	if (!params.skip_profiling) {
+	// if (!params.skip_profiling) {
 
-		fastq_ch = fastq_ch
-			.map { sample, fastqs ->
-				sample_id = sample.id.replaceAll(/\.singles$/, "")
-				return tuple(sample_id, fastqs)
-			}
-			.groupTuple()
-			.map { sample_id, fastqs ->
-				def meta = [:]
-				meta.id = sample_id				
-				return tuple(meta, [fastqs].flatten())
-			}
+	// 	fastq_ch = fastq_ch
+	// 		.map { sample, fastqs ->
+	// 			sample_id = sample.id.replaceAll(/\.singles$/, "")
+	// 			return tuple(sample_id, fastqs)
+	// 		}
+	// 		.groupTuple()
+	// 		.map { sample_id, fastqs ->
+	// 			def meta = [:]
+	// 			meta.id = sample_id				
+	// 			return tuple(meta, [fastqs].flatten())
+	// 		}
 
-		run_metaphlan4(fastq_ch, params.mp4_db)
+	// 	run_metaphlan4(fastq_ch, params.mp4_db)
 		
-		if (params.mp4_collate || params.run_humann3) {
-			collate_metaphlan4_tables(
-				run_metaphlan4.out.mp4_table
-					.map { sample, table -> return table }
-					.collect()
-			)
-		}
+	// 	if (params.mp4_collate || params.run_humann3) {
+	// 		collate_metaphlan4_tables(
+	// 			run_metaphlan4.out.mp4_table
+	// 				.map { sample, table -> return table }
+	// 				.collect()
+	// 		)
+	// 	}
 
-		if (params.run_humann3) {
-			humann3(
-				collate_metaphlan4_tables.out.mp4_abundance_table,
-				run_metaphlan4.out.mp4_table,
-				fastq_ch
-			)
-		}
+	// 	if (params.run_humann3) {
+	// 		humann3(
+	// 			collate_metaphlan4_tables.out.mp4_abundance_table,
+	// 			run_metaphlan4.out.mp4_table,
+	// 			fastq_ch
+	// 		)
+	// 	}
 
-		if (params.run_metaphlan3) {
-			run_metaphlan3(fastq_ch, params.mp3_db)
-			mp3_tables_ch = run_metaphlan3.out.mp3_table
-				.map { sample, table -> return table }
+	// 	if (params.run_metaphlan3) {
+	// 		run_metaphlan3(fastq_ch, params.mp3_db)
+	// 		mp3_tables_ch = run_metaphlan3.out.mp3_table
+	// 			.map { sample, table -> return table }
 
-			collate_metaphlan3_tables(mp3_tables_ch.collect())
-		}
+	// 		collate_metaphlan3_tables(mp3_tables_ch.collect())
+	// 	}
 
-		if (params.run_samestr) {
-			samestr(
-				run_metaphlan4.out.mp4_sam,
-				run_metaphlan4.out.mp4_table
-			)
-		}	
+	// 	if (params.run_samestr) {
+	// 		samestr(
+	// 			run_metaphlan4.out.mp4_sam,
+	// 			run_metaphlan4.out.mp4_table
+	// 		)
+	// 	}	
       
-    }
+    // }
 
 }
 
