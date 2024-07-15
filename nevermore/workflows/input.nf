@@ -108,7 +108,7 @@ workflow fastq_input {
 			}
 			// .collect()
 
-		fastq_ch = prepare_fastqs.out.fastqs
+		prepped_fastq_ch = prepare_fastqs.out.fastqs
 			.collect()
 			.flatten()
 			.map { file -> 
@@ -126,7 +126,7 @@ workflow fastq_input {
 			}
 
 	emit:
-		fastqs = fastq_ch
+		fastqs = prepped_fastq_ch
 }
 
 
