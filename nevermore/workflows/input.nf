@@ -53,7 +53,9 @@ process prepare_fastqs {
 		def libsfx_param = (library_suffix != null) ? "--add_sample_suffix ${library_suffix}" : ""
 		
 		"""
-		prepare_fastqs.py -i . -o fastq/ -p ${input_dir_prefix} ${custom_suffixes} ${remote_option} ${remove_suffix} ${libsfx_param}
+		mkdir -p reads/${sample}
+		ls ${files} | xargs -I{} sh -c 'ln -s ../../{} reads/${sample}/'
+		prepare_fastqs.py -i reads -o fastq -p ${input_dir_prefix} ${custom_suffixes} ${remote_option} ${remove_suffix} ${libsfx_param}
 		"""
 }
 
