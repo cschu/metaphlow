@@ -38,7 +38,7 @@ process transfer_bams {
 process prepare_fastqs {
 
 	input:
-		path(files)
+		tuple val(sample), path(files)
 		val(remote_input)
 		val(library_suffix)
 	output:
@@ -96,6 +96,8 @@ workflow fastq_input {
 		libsfx
 	
 	main:
+		fastq_ch = fastq_ch
+			.map { dir -> return tuple(dir.getName(), dir) }
 		// prepare_fastqs(fastq_ch.collect(), (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 		fastq_ch.dump(pretty: true, tag: "fastq_ch")
 		prepare_fastqs(fastq_ch, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
