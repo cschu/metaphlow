@@ -96,13 +96,15 @@ workflow fastq_input {
 		libsfx
 	
 	main:
-		prepare_fastqs(fastq_ch.collect(), (params.remote_input_dir != null || params.remote_input_dir), libsfx)
+		// prepare_fastqs(fastq_ch.collect(), (params.remote_input_dir != null || params.remote_input_dir), libsfx)
+		prepare_fastqs(fastq_ch, (params.remote_input_dir != null || params.remote_input_dir), libsfx)
 
 		library_info_ch = prepare_fastqs.out.library_info
 			.splitCsv(header:false, sep:'\t', strip:true)
 			.map { row -> 
 				return tuple(row[0], row[1])
 			}
+			.collect()
 
 		fastq_ch = prepare_fastqs.out.fastqs
 			.flatten()
