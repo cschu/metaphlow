@@ -127,6 +127,7 @@ workflow fastq_input {
 				meta.library = (library_is_paired == "1") ? "paired" : "single"
 				return tuple(meta, [files].flatten())
 			}
+		prepped_fastq_ch.dump(pretty: true, tag: "prepped_fastq_ch")
 
 
 		// prepped_fastq_ch = prepare_fastqs.out.fastqs
