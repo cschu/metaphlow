@@ -278,6 +278,7 @@ def main():
 	ap.add_argument("--valid-fastq-suffixes", type=str, default="fastq,fq")
 	ap.add_argument("--valid-compression-suffixes", type=str, default="gz,bz2")
 	ap.add_argument("--add_sample_suffix", type=str)
+	ap.add_argument("-s", "--sample", type=str)
 
 	args = ap.parse_args()
 

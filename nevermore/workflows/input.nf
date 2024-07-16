@@ -40,7 +40,8 @@ process prepare_fastqs {
 	input:
 		tuple val(sample), path(files), val(remote_input), val(library_suffix)
 	output:
-		tuple val(sample), path("fastq/*/*.fastq.{gz,bz2}"), emit: fastqs
+		tuple val(sample), path("fastq/${sample}/${sample}_R?.fastq.{gz,bz2}"), emit: pairs, optional: true
+		tuple val(sample), path("fastq/${sample}/${sample}.singles*.fastq.{gz,bz2}"), emit: singles, optional: true
 		path("sample_library_info.txt"), emit: library_info
 
   script:
@@ -104,7 +105,7 @@ workflow fastq_input {
 		
 		fastq_ch.dump(pretty: true, tag: "fastq_ch")
 		prepare_fastqs(fastq_ch)
-		prepare_fastqs.out.fastqs.dump(pretty: true, tag: "prepare_fastqs_out")
+		prepare_fastqs.out.singles.mix(prepare_fastqs.out.pairs).dump(pretty: true, tag: "prepare_fastqs_out")
 
 		library_info_ch = prepare_fastqs.out.library_info
 		 	.splitCsv(header:false, sep:'\t', strip:true)
@@ -113,22 +114,37 @@ workflow fastq_input {
 		 	}
 		// 	// .collect()
 
-		prepped_fastq_ch = prepare_fastqs.out.fastqs
-			.map { sample, files -> return files }
-			.flatten()
-			.map { file -> 
-			 	def sample = file.getParent().getName()
-			 	return tuple(sample, file)
-			}
-			.groupTuple(sort: true, size: 2, remainder: true)
-			.join(by: 0, library_info_ch, remainder: true)
-			.map { sample_id, files, library_is_paired ->
+		prepped_fastq_ch = prepare_fastqs.out.singles
+			.map { sample_id, files -> return tuple("${sample_id}.singles", files, false) }
+			.mix(prepare_fastqs.out.pairs
+				.map { sample_id, files -> return tuple(sample_id, files, true) }
+			)
+			.join(by: 0, library_info_ch)
+			.map { sample_id, files, is_paired, library_is_paired ->
 				def meta = [:]
 				meta.id = sample_id
-				meta.is_paired = (files instanceof Collection && files.size() == 2)
+				meta.is_paired = is_paired //(files instanceof Collection && files.size() == 2)
 				meta.library = (library_is_paired == "1") ? "paired" : "single"
-				return tuple(meta, files)
+				return tuple(meta, [files].flatten())
 			}
+
+
+		// prepped_fastq_ch = prepare_fastqs.out.fastqs
+		// 	.map { sample, files -> return files }
+		// 	.flatten()
+		// 	.map { file -> 
+		// 	 	def sample = file.getParent().getName()
+		// 	 	return tuple(sample, file)
+		// 	}
+		// 	.groupTuple(sort: true, size: 2, remainder: true)
+		// 	.join(by: 0, library_info_ch, remainder: true)
+		// 	.map { sample_id, files, library_is_paired ->
+		// 		def meta = [:]
+		// 		meta.id = sample_id
+		// 		meta.is_paired = (files instanceof Collection && files.size() == 2)
+		// 		meta.library = (library_is_paired == "1") ? "paired" : "single"
+		// 		return tuple(meta, files)
+		// 	}
 
 	emit:
 		fastqs = prepped_fastq_ch
