@@ -103,7 +103,7 @@ workflow fastq_input {
 
 		if (params.ignore_samples) {
 			ignore_samples = params.ignore_samples.split(",")
-			print ignore_samples
+			print "Ignoring samples: ${ignore_samples}"
 			fastq_ch = fastq_ch
 	 			.filter { !ignore_samples.contains(it[0]) }
 		}
@@ -117,7 +117,6 @@ workflow fastq_input {
 		 	.map { row -> 
 		 		return tuple(row[0], row[1])
 		 	}
-		// 	// .collect()
 
 		prepped_fastq_ch = prepare_fastqs.out.singles
 			.map { sample_id, files -> return tuple("${sample_id}.singles", files, false) }
@@ -128,29 +127,11 @@ workflow fastq_input {
 			.map { sample_id, files, is_paired, library_is_paired ->
 				def meta = [:]
 				meta.id = sample_id
-				meta.is_paired = is_paired //(files instanceof Collection && files.size() == 2)
+				meta.is_paired = is_paired
 				meta.library = (library_is_paired == "1") ? "paired" : "single"
 				return tuple(meta, [files].flatten())
 			}
-		prepped_fastq_ch.dump(pretty: true, tag: "prepped_fastq_ch")
-
-
-		// prepped_fastq_ch = prepare_fastqs.out.fastqs
-		// 	.map { sample, files -> return files }
-		// 	.flatten()
-		// 	.map { file -> 
-		// 	 	def sample = file.getParent().getName()
-		// 	 	return tuple(sample, file)
-		// 	}
-		// 	.groupTuple(sort: true, size: 2, remainder: true)
-		// 	.join(by: 0, library_info_ch, remainder: true)
-		// 	.map { sample_id, files, library_is_paired ->
-		// 		def meta = [:]
-		// 		meta.id = sample_id
-		// 		meta.is_paired = (files instanceof Collection && files.size() == 2)
-		// 		meta.library = (library_is_paired == "1") ? "paired" : "single"
-		// 		return tuple(meta, files)
-		// 	}
+		prepped_fastq_ch.dump(pretty: true, tag: "prepped_fastq_ch")		
 
 	emit:
 		fastqs = prepped_fastq_ch
