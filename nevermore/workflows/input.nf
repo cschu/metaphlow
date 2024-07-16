@@ -101,7 +101,14 @@ workflow fastq_input {
 			.map { file -> return tuple(file.getParent().getName(), file) }
 			.groupTuple(by: 0)
 			.combine(libsfx)
-			.map { id, files, suffix -> return tuple(id, files, (params.remote_input_dir != null || params.remote_input_dir), suffix) }
+			.map { sample_id, files, suffix -> return tuple(sample_id, files, (params.remote_input_dir != null || params.remote_input_dir), suffix) }
+
+		if (params.ignore_samples) {
+			ignore_samples = params.ignore_samples.split(",")
+			print ignore_samples
+			fastq_ch = fastq_ch
+	 			.filter { !ignore_samples.contains(it[0]) }
+		}
 		
 		fastq_ch.dump(pretty: true, tag: "fastq_ch")
 		prepare_fastqs(fastq_ch)
