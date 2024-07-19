@@ -54,10 +54,19 @@ process qc_bbduk {
     def stats_out = "stats=stats/qc/bbduk/${sample.id}.bbduk_stats.txt"
 
     """
-    set -e -o pipefail
+    set -e
 
     mkdir -p qc_reads/${sample.id}/ stats/qc/bbduk/
     bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} ${qenc_str} ${stats_out} ${read1} ${read2} 2>&1 | tee logfile 
+
+    if [[ \$(grep -c 'There appear to be different numbers of reads in the paired input files.' logfile) -eq 1 ]]; then
+        repair.sh -Xmx${maxmem}g t=${task.cpus} in=${r1_files[0]} in2=${r2_files[0]} out=${sample.id}.repaired_R1.fastq.gz out2=${sample.id}.repaired_R2.fastq.gz outs=${sample.id}.repaired.orphans_R1.fastq
+        bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} ${qenc_str} ${stats_out} overwrite=t \
+            in=${sample.id}.repaired_R1.fastq.gz in2=${sample.id}.repaired_R2.fastq.gz \
+            out=qc_reads/${sample.id}/${sample.id}_R1.fastq.gz out2=qc_reads/${sample.id}/${sample.id}_R2.fastq.gz outs=tmp_orphans.fq
+        cat ${sample.id}.repaired.orphans_R1.fastq >> tmp_orphans.fq
+    fi
+
     ${orphan_filter}
     ${orphan_check}
 
