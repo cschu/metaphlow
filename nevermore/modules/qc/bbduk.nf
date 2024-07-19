@@ -30,7 +30,7 @@ process qc_bbduk {
     def orphan_filter = ""
 
     def bb_params = params.qc_params_shotgun    
-    def trim_params = "${bb_params} ref=${adapters} minlen=${params.qc_minlen}"
+    def trim_params = "${bb_params} ref=${adapters} minlen=${params.qc_minlen} ibq qout=33"
 
     def r1_files = reads.findAll( { it.name.endsWith("_R1.fastq.${compression}") } )
 	def r2_files = reads.findAll( { it.name.endsWith("_R2.fastq.${compression}") } )
