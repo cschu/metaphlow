@@ -35,7 +35,8 @@ process qc_bbduk {
     def r1_files = reads.findAll( { it.name.endsWith("_R1.fastq.${compression}") } )
 	def r2_files = reads.findAll( { it.name.endsWith("_R2.fastq.${compression}") } )
 
-    def qenc_str = (params.phred64 != null && params.phred64 != false) ? "qin=64" : ""
+    def qenc_str = (params.phred64 != null && params.phred64 != false) ? "qin=64" : "qin=33"
+
 
     if (r1_files.size() != 0) {
         read1 += "in1=${r1_files[0]} out1=qc_reads/${sample.id}/${sample.id}_R1.fastq.gz"
