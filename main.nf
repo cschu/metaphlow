@@ -23,19 +23,12 @@ params.skip_alignment = true
 workflow {
 
 	fastq_input(
-		Channel.fromPath(input_dir + "/*", type: "dir"),
+		Channel.fromPath(input_dir + "/**"),
 		Channel.of(null)
 	)
 
 	fastq_input_ch = fastq_input.out.fastqs
 
-	if (params.ignore_samples) {
-		ignore_samples = params.ignore_samples.split(",")
-		print ignore_samples
-		fastq_input_ch = fastq_input_ch
-			.filter { !ignore_samples.contains(it[0].id) }
-	}
-	
 	fastq_input_ch.dump(pretty: true, tag: "fastq_input_ch")
 	nevermore_main(fastq_input_ch)
 
