@@ -7,7 +7,7 @@ include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
 include { humann3 } from "./metaphlow/workflows/humann3"
-include { samestr } from "./metaphlow/workflows/samestr"
+include { samestr_full; samestr_without_convert } from "./metaphlow/workflows/samestr"
 
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
@@ -22,19 +22,26 @@ params.skip_alignment = true
 
 workflow {
 
-	fastq_input(
-		Channel.fromPath(input_dir + "/**"),
-		Channel.of(null)
-	)
-
-	fastq_input_ch = fastq_input.out.fastqs
-
-	fastq_input_ch.dump(pretty: true, tag: "fastq_input_ch")
-	nevermore_main(fastq_input_ch)
-
-	fastq_ch = nevermore_main.out.fastqs
-	
 	if (!params.skip_profiling) {
+
+		fastq_input(
+			Channel.fromPath(input_dir + "/**"),
+			Channel.of(null)
+		)
+
+		fastq_input_ch = fastq_input.out.fastqs
+
+		if (params.ignore_samples) {
+			ignore_samples = params.ignore_samples.split(",")
+			print ignore_samples
+			fastq_input_ch = fastq_input_ch
+				.filter { !ignore_samples.contains(it[0].id) }
+		}
+		
+		fastq_input_ch.dump(pretty: true, tag: "fastq_input_ch")
+		nevermore_main(fastq_input_ch)
+
+		fastq_ch = nevermore_main.out.fastqs	
 
 		fastq_ch = fastq_ch
 			.map { sample, fastqs ->
@@ -75,13 +82,31 @@ workflow {
 		}
 
 		if (params.run_samestr) {
-			samestr(
+			samestr_full(
 				run_metaphlan4.out.mp4_sam,
 				run_metaphlan4.out.mp4_table
 			)
 		}	
       
-    }
+    } else if (params.run_samestr) {
+
+		ss_converted = Channel.fromPath(input_dir + "/**.npz")
+			.map { file ->
+					def species = file.name.replaceAll(/[.].*/, "")
+					return tuple(species, file)
+			}
+			.groupTuple(sort: true)
+
+		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+			.map { file ->
+				def meta = [:]
+				meta.id = file.name.replaceAll(/\.txt$/, "")
+				return tuple(meta, file)
+			}
+
+		samestr_without_convert(ss_converted, mp4_tables)        
+
+	}
 
 }
 
