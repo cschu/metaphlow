@@ -7,7 +7,7 @@ include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
 include { humann3 } from "./metaphlow/workflows/humann3"
-include { samestr_full; samestr_without_convert } from "./metaphlow/workflows/samestr"
+include { samestr_full; samestr_post_convert } from "./metaphlow/workflows/samestr"
 
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
@@ -104,7 +104,7 @@ workflow {
 				return tuple(meta, file)
 			}
 
-		samestr_without_convert(ss_converted, mp4_tables)        
+		samestr_post_convert(ss_converted, mp4_tables)        
 
 	}
 
