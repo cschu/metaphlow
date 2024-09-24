@@ -29,7 +29,7 @@ process qc_bbduk {
     def orphan_check = ""
     def orphan_filter = ""
 
-    def bb_params = params.qc_params_shotgun    
+    def bb_params = params.qc_params_shotgun
     def trim_params = "${bb_params} ref=${adapters} minlen=${params.qc_minlen} ibq qout=33 tossbrokenreads=t"
 
     def r1_files = reads.findAll( { it.name.endsWith("_R1.fastq.${compression}") } )
@@ -58,7 +58,7 @@ process qc_bbduk {
     set -e
 
     mkdir -p qc_reads/${sample.id}/ stats/qc/bbduk/
-    bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} ${qenc_str} ${stats_out} ${read1} ${read2} 2>&1 | tee logfile 
+    bbduk.sh -Xmx${maxmem}g t=${task.cpus} ${trim_params} ${qenc_str} ${stats_out} ${read1} ${read2} 2>&1 | tee logfile
 
     if [[ \$(grep -c 'There appear to be different numbers of reads in the paired input files.' logfile) -eq 1 ]]; then
         repair.sh -Xmx${maxmem}g t=${task.cpus} in=${r1_files[0]} in2=${r2_files[0]} out=${sample.id}.repaired_R1.fastq.gz out2=${sample.id}.repaired_R2.fastq.gz outs=${sample.id}.repaired.orphans_R1.fastq ${qenc_str} qout=33 tossbrokenreads=t

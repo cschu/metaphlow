@@ -17,7 +17,7 @@ workflow samestr_post_convert {
 		// 			return tuple(species, file)
 		// 	}
 		// 	.groupTuple(sort: true)
-            
+
 		// run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
 		run_samestr_merge(ss_converted, params.samestr_marker_db)
 		run_samestr_filter(
@@ -30,7 +30,7 @@ workflow samestr_post_convert {
 		run_samestr_summarize(
 			run_samestr_compare.out.sstr_compare.collect(),
 			mp4_tables.map { sample, table -> return table }.collect(),
-			params.samestr_marker_db			
+			params.samestr_marker_db
 		)
 
 }
@@ -74,7 +74,7 @@ workflow samestr_full {
 		// run_samestr_summarize(
 		// 	run_samestr_compare.out.sstr_compare.collect(),
 		// 	mp4_tables.map { sample, table -> return table }.collect(),
-		// 	params.samestr_marker_db			
+		// 	params.samestr_marker_db
 		// )
 
 }
