@@ -39,7 +39,7 @@ process run_motus {
     // def motus_input = (sample.is_paired) ? "-f ${sample.id}_R1.fastq.gz -r ${sample.id}_R2.fastq.gz" : "-s ${sample.id}_R1.fastq.gz";
     def mapsnv_cmd = ""
     if (params.motus_run_mapsnv) {
-        mapsnv_cmd += "motus map_snv ${input_files} -t ${task.cpus} > ${sample.id}/${sample.id}.motus.bam"
+        mapsnv_cmd += "motus map_snv -t ${task.cpus} -db ${motus_db} ${input_files} > ${sample.id}/${sample.id}.motus.bam"
     } else {
         mapsnv_cmd += "touch ${sample.id}/${sample.id}.motus.bam"
     }
