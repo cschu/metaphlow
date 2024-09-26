@@ -3,7 +3,8 @@ params.motus_min_length = 75
 params.motus_n_marker_genes = 3
 params.motus_readcount_type = "insert.scaled_counts"
 params.motus_run_mapsnv = false
-
+params.motus_full_rank_taxonomy = false
+params.motus_print_counts = false
 
 process run_motus {
     container "quay.io/biocontainers/motus:3.1.0--pyhdfd78af_0"
@@ -43,10 +44,19 @@ process run_motus {
     } else {
         mapsnv_cmd += "touch ${sample.id}/${sample.id}.motus.bam"
     }
+
+    def full_rank = ""
+    if (params.motus_full_rank_taxonomy == true) {
+        full_rank = "-q"
+    }
+    def print_counts = ""
+    if (params.motus_print_counts) {
+        print_counts = "-c"
+    }
     
     """
     mkdir -p ${sample.id}
-    motus profile -n ${sample.id} -t ${task.cpus} -k ${params.motus_tax_level} -c -v 7 -q -l ${params.motus_min_length} -g ${params.motus_n_marker_genes} -y ${params.motus_readcount_type} -db ${motus_db} ${input_files} > ${sample.id}/${sample.id}.motus.txt
+    motus profile -n ${sample.id} -t ${task.cpus} -k ${params.motus_tax_level} ${print_counts} -v 7 ${full_rank} -l ${params.motus_min_length} -g ${params.motus_n_marker_genes} -y ${params.motus_readcount_type} -db ${motus_db} ${input_files} > ${sample.id}/${sample.id}.motus.txt
     ${mapsnv_cmd}
     """
 
