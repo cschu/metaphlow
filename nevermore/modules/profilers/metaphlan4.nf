@@ -17,7 +17,8 @@ process run_metaphlan4 {
 	script:
 	def mp4_params = "--bowtie2db ${mp4_db} --input_type fastq --nproc ${task.cpus} --tmp_dir tmp/"
 	def mp4_input = ""
-	def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
+	// def bt2_out = "--bowtie2out ${sample.id}.bowtie2.bz2"
+	def bt2_out = ""
 
 	def samestr_params = ""
 	if (params.run_samestr || params.samestr_compatible_output) {
