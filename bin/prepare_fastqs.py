@@ -22,6 +22,19 @@ logger = logging.getLogger(__name__)
 
 
 def check_pairwise(r1, r2):
+	d = {}
+	for prefix, fn in itertools.chain(r1, r2):
+		d.setdefault(prefix[:-1], []).append((prefix, fn))
+	for prefix, reads in d.items():
+		if len(reads) == 2:
+			yield reads[0][1], reads[1][1]
+		elif len(reads) == 1:
+			yield (None, reads[0][1]) if reads[0][0][-1] == "2" else (reads[0][1], None)
+		else:
+			raise ValueError(f"Weird number of reads found: {reads}")
+
+
+def check_pairwise_old(r1, r2):
 	""" Checks if two sets of read files contain the same prefixes.
 
 	Input:
@@ -278,6 +291,7 @@ def main():
 	ap.add_argument("--valid-fastq-suffixes", type=str, default="fastq,fq")
 	ap.add_argument("--valid-compression-suffixes", type=str, default="gz,bz2")
 	ap.add_argument("--add_sample_suffix", type=str)
+	ap.add_argument("--override_pair_check", action="store_true")
 
 	args = ap.parse_args()
 
