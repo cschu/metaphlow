@@ -102,6 +102,13 @@ workflow fastq_input {
 			.combine(libsfx)
 			.map { sample_id, files, suffix -> return tuple(sample_id, files, (params.remote_input_dir != null || params.remote_input_dir), suffix) }
 
+		if (params.ignore_samples) {
+			ignore_samples = params.ignore_samples.split(",")
+			print "Ignoring samples: ${ignore_samples}"
+			fastq_ch = fastq_ch
+				.filter { !ignore_samples.contains(it[0]) }
+		}
+
 		fastq_ch.dump(pretty: true, tag: "fastq_ch")
 		prepare_fastqs(fastq_ch)
 		prepare_fastqs.out.singles.mix(prepare_fastqs.out.pairs).dump(pretty: true, tag: "prepare_fastqs_out")
