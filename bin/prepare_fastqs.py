@@ -22,6 +22,19 @@ logger = logging.getLogger(__name__)
 
 
 def check_pairwise(r1, r2):
+	d = {}
+	for prefix, fn in itertools.chain(r1, r2):
+		d.setdefault(prefix[:-1], []).append((prefix, fn))
+	for prefix, reads in d.items():
+		if len(reads) == 2:
+			yield reads[0][1], reads[1][1]
+		elif len(reads) == 1:
+			yield (None, reads[0][1]) if reads[0][0][-1] == "2" else (reads[0][1], None)
+		else:
+			raise ValueError(f"Weird number of reads found: {reads}")
+
+
+def check_pairwise_old(r1, r2):
 	""" Checks if two sets of read files contain the same prefixes.
 
 	Input:
@@ -171,18 +184,28 @@ def process_sample(
 		r2 = [(p, f) for p, f in zip(prefixes, fastqs) if re.search(r"[._R]2$", p)]
 		others = sorted(list(set(fastqs).difference({f for _, f in r1}).difference({f for _, f in r2})))
 
-		# check if R1/R2 sets have equal sizes or are empty
-		# R1 empty: potential scRNAseq (or any protocol with barcode reads in R1)
-		# R2 empty: typical single end reads with (R?)1 suffix
-		assert len(r2) == 0 or len(r1) == 0 or (r1 and len(r1) == len(r2)), "R1/R2 sets are not of the same length"
+		if False:
+			# check if R1/R2 sets have equal sizes or are empty
+			# R1 empty: potential scRNAseq (or any protocol with barcode reads in R1)
+			# R2 empty: typical single end reads with (R?)1 suffix
+			assert len(r2) == 0 or len(r1) == 0 or (r1 and len(r1) == len(r2)), "R1/R2 sets are not of the same length"
 
-		# if R1 and R2 are of equal size, check if the prefixes match
-		if len(r1) == len(r2) and r1:
-			check_pairwise(r1, r2)
+			# if R1 and R2 are of equal size, check if the prefixes match
+			if len(r1) == len(r2) and r1:
+				check_pairwise(r1, r2)
 
-		# sort R1/R2 for concatenation, get rid off prefixes
-		r1 = sorted(f for _, f in r1)
-		r2 = sorted(f for _, f in r2)
+			# sort R1/R2 for concatenation, get rid off prefixes
+			r1 = sorted(f for _, f in r1)
+			r2 = sorted(f for _, f in r2)
+		else:
+			reads = list(check_pairwise(r1, r2))
+			r1, r2 = zip(*((f1, f2) for f1, f2 in reads if f1 and f2))
+			orphans = [
+				r1 or r2
+				for r1, r2 in reads
+				if r1 is None or r2 is None
+			]
+
 
 		print("R1", r1, file=sys.stderr)
 		print("R2", r2, file=sys.stderr)
@@ -278,6 +301,7 @@ def main():
 	ap.add_argument("--valid-fastq-suffixes", type=str, default="fastq,fq")
 	ap.add_argument("--valid-compression-suffixes", type=str, default="gz,bz2")
 	ap.add_argument("--add_sample_suffix", type=str)
+	ap.add_argument("--override_pair_check", action="store_true")
 
 	args = ap.parse_args()
 
