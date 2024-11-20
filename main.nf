@@ -6,6 +6,7 @@ include { nevermore_main } from "./nevermore/workflows/nevermore"
 include { fastq_input } from "./nevermore/workflows/input"
 include { run_metaphlan4; combine_metaphlan4; collate_metaphlan4_tables } from "./nevermore/modules/profilers/metaphlan4"
 include { run_metaphlan3; combine_metaphlan3; collate_metaphlan3_tables } from "./nevermore/modules/profilers/metaphlan3"
+include { run_motus } from "./nevermore/modules/profilers/motus"
 include { humann3 } from "./metaphlow/workflows/humann3"
 include { samestr_full; samestr_post_convert } from "./metaphlow/workflows/samestr"
 
@@ -18,6 +19,8 @@ if (!params.fastq_input_pattern) {
 def fastq_input_pattern = input_dir + "/" + params.fastq_input_pattern
 
 params.skip_alignment = true
+
+params.sstr_profiler = "metaphlan4"
 
 
 workflow {
@@ -55,38 +58,70 @@ workflow {
 				return tuple(meta, [fastqs].flatten())
 			}
 
-		run_metaphlan4(fastq_ch, params.mp4_db)
-		
-		if (params.mp4_collate || params.run_humann3) {
-			collate_metaphlan4_tables(
-				run_metaphlan4.out.mp4_table
+		alignments = Channel.empty()
+		tax_profiles = Channel.empty()
+		if (params.sstr_profiler == "motus") {
+
+			run_motus(fastq_ch, params.motus_db)
+
+			alignments = run_motus.out.motus_bam
+			tax_profiles = run_motus.out.motus_profile
+
+			// if (params.run_samestr) {
+			// 	samestr_full(
+			// 		run_motus.out.motus_bam,
+			// 		run_motus.out.motus_profile					
+			// 	)
+			// }
+
+		} else {
+
+			run_metaphlan4(fastq_ch, params.mp4_db)
+
+			if (params.mp4_collate || params.run_humann3) {
+				collate_metaphlan4_tables(
+					run_metaphlan4.out.mp4_table
+						.map { sample, table -> return table }
+						.collect()
+				)
+			}
+
+			if (params.run_humann3) {
+				humann3(
+					collate_metaphlan4_tables.out.mp4_abundance_table,
+					run_metaphlan4.out.mp4_table,
+					fastq_ch
+				)
+			}
+
+			if (params.run_metaphlan3) {
+				run_metaphlan3(fastq_ch, params.mp3_db)
+				mp3_tables_ch = run_metaphlan3.out.mp3_table
 					.map { sample, table -> return table }
-					.collect()
-			)
-		}
 
-		if (params.run_humann3) {
-			humann3(
-				collate_metaphlan4_tables.out.mp4_abundance_table,
-				run_metaphlan4.out.mp4_table,
-				fastq_ch
-			)
-		}
+				collate_metaphlan3_tables(mp3_tables_ch.collect())
+			}
 
-		if (params.run_metaphlan3) {
-			run_metaphlan3(fastq_ch, params.mp3_db)
-			mp3_tables_ch = run_metaphlan3.out.mp3_table
-				.map { sample, table -> return table }
+			alignments = run_metaphlan4.out.mp4_sam
+			tax_profiles = run_metaphlan4.out.mp4_table
 
-			collate_metaphlan3_tables(mp3_tables_ch.collect())
+			// if (params.run_samestr) {
+			// 	samestr_full(
+			// 		run_metaphlan4.out.mp4_sam,
+			// 		run_metaphlan4.out.mp4_table
+			// 	)
+			// }
+			
 		}
 
 		if (params.run_samestr) {
-			samestr_full(
-				run_metaphlan4.out.mp4_sam,
-				run_metaphlan4.out.mp4_table
-			)
-		}	
+				samestr_full(
+					alignments,
+					tax_profiles
+				)
+			}
+
+		
       
     } else if (params.run_samestr) {
 

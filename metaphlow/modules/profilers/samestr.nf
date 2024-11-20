@@ -178,7 +178,7 @@ process run_samestr_summarize {
     """
     mkdir profiles/
     # TODO: this will only work with metaphlan, not motus
-    find . -maxdepth 1 -name '*.mp4.txt' -exec mv -v {} profiles/ \\;
+    find . -maxdepth 1  \\( -name '*.mp4.txt' -o -name '*.motus.txt' \\) -exec mv -v {} profiles/ \\;
 
     samestr --verbosity DEBUG \
     summarize \
