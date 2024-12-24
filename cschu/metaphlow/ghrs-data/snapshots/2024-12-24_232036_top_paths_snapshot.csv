@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/cschu/metaphlow,4,2
+/cschu/metaphlow/commit/849ad9c24d913331021353364df4e3c1d06ee5b8,2,1
+/cschu/metaphlow/blob/main/config/params.yml,1,1
+/cschu/metaphlow/blob/main/config/run.config,1,1
+/cschu/metaphlow/blob/main/main.nf,1,1
+/cschu/metaphlow/blob/main/metaphlow/modules/profilers/samestr.nf,1,1
+/cschu/metaphlow/blob/main/metaphlow/workflows/samestr.nf,1,1
+/cschu/metaphlow/tree/main,1,1
+/cschu/metaphlow/tree/main/metaphlow,1,1
+/cschu/metaphlow/tree/main/metaphlow/workflows,1,1
