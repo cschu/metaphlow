@@ -39,15 +39,17 @@ process run_samestr_merge {
     label "samestr"
     
     input:
-        tuple val(species), path(sstr_npy)
-	path(marker_db)
+        // tuple val(species), path(sstr_npy)
+        path(sstr_npy)
+	    path(marker_db)
 
     output:
-        tuple \
-            val(species), \
-            path("sstr_merge/${species}.npz"), \
-            path("sstr_merge/${species}.names.txt"), \
-        emit: sstr_npy
+        // tuple \
+        //     val(species), \
+        //     path("sstr_merge/${species}.npz"), \
+        //     path("sstr_merge/${species}.names.txt"), \
+        // emit: sstr_npy
+        tuple path("sstr_merge/*.npz"), path("sstr_merge/*.names.txt"), emit: sstr_npy
 
     script:
     """
@@ -55,10 +57,10 @@ process run_samestr_merge {
     merge \
         --input-files ${sstr_npy} \
         --output-dir sstr_merge/ \
-	--marker-dir ${marker_db} \
-        --clade ${species} \
+	    --marker-dir ${marker_db} \
         --nprocs ${task.cpus}
     """
+    // --clade ${species} \
 }
 
 process run_samestr_filter {

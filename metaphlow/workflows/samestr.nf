@@ -20,8 +20,15 @@ workflow samestr_post_convert {
 
 		// run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
 		run_samestr_merge(ss_converted, params.samestr_marker_db)
+
+		filter_input_ch = run_samestr_merge.out.sstr_npy
+			.flatten()
+			.map { file -> [ file.getSimpleName(), file ] }
+			.groupTuple(by: 0, sort: true)
+
+
 		run_samestr_filter(
-			run_samestr_merge.out.sstr_npy,
+			filter_input_ch,
 			params.samestr_marker_db
 		)
 		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
@@ -35,7 +42,7 @@ workflow samestr_post_convert {
 
 }
 
-
+params.samestr_merge_buffer_size = 100
 
 workflow samestr_full {
 
@@ -61,6 +68,8 @@ workflow samestr_full {
 					return tuple(species, file)
 			}
 			.groupTuple(sort: true)
+			.map { species, files -> files }
+			.buffer(size: params.samestr_merge_buffer_size)
 
 		if (!params.stop_after_convert) {
 			// samestr_post_convert(grouped_npy_ch, mp4_tables)
