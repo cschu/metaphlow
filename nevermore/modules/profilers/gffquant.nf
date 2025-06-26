@@ -4,12 +4,13 @@ params.gq_single_end_library = params.single_end_library
 params.gq_min_identity = params.min_identity
 params.gq_mode = "genes"
 params.gq_ambig_mode = "1overN"
+params.gq_restrict_metrics = "raw,lnorm,scaled,rpkm"
 
 
 process stream_gffquant {
 	tag "gffquant.${sample}"
-	publishDir "${params.output_dir}/profiles", mode: "copy", pattern: "*.{txt.gz,pd.txt}"
-	publishDir "${params.output_dir}", mode: "copy", pattern: "logs/*.log"
+	// publishDir "${params.output_dir}/profiles", mode: "copy", pattern: "*.{txt.gz,pd.txt}"
+	// publishDir "${params.output_dir}", mode: "copy", pattern: "logs/*.log"
 	label "gffquant"
 	label "large"
 
@@ -33,7 +34,7 @@ process stream_gffquant {
 			gq_params += (params.gq_min_identity) ? (" --min_identity " + params.gq_min_identity) : ""
 			// LEGACY PARAMETERS, partially not implemented in newer gffquant
 			// gq_params += (params.gq_strand_specific) ? " --strand_specific" : ""
-			// gq_params += (params.gq_restrict_metrics) ? " --restrict_metrics ${params.gq_restrict_metrics}" : ""
+			gq_params += (params.gq_restrict_metrics) ? " --restrict_metrics ${params.gq_restrict_metrics}" : ""
 			// gq_params += (params.gq_keep_alignments) ? " --keep_alignment_file ${sample}.sam" : ""
 			// gq_params += (params.gq_unmarked_orphans) ? " --unmarked_orphans" : ""
 			def mkdir_alignments = (params.keep_alignment_file != null && params.keep_alignment_file != false) ? "mkdir -p alignments/${sample}/" : ""
@@ -67,19 +68,17 @@ process stream_gffquant {
 
 			}
 	
-			def gq_cmd = "gffquant ${gq_output} ${gq_params} --db GQ_DATABASE --aligner ${params.gq_aligner} ${input_files}"
+			def gq_cmd = "gffquant ${gq_output} ${gq_params} --db \$GQ_DATABASE --aligner ${params.gq_aligner} ${input_files}"
 			
 			"""
 			set -e -o pipefail
 			mkdir -p logs/ tmp/
 			${mkdir_alignments}
-			echo 'Copying database...'
-			cp -v \$(dirname \$(readlink ${gq_db}))/*sqlite3 GQ_DATABASE
-
+			GQ_DATABASE=\$(dirname \$(readlink ${gq_db}))/*sqlite3
 
 			${gq_cmd} --reference \$(readlink ${gq_db}) &> logs/${sample}.log
 			gzip -dc ${sample}/${sample}.gene_counts.txt.gz | cut -f 1 > ${sample}/${sample}.gene_ids.txt
-			rm -rfv GQ_DATABASE* tmp/
+			rm -rfv tmp/
 			"""
 
 }
