@@ -134,6 +134,29 @@ workflow {
 
 		samestr_post_convert(ss_converted, mp4_tables)        
 
+	} else if (params.refilter_samestr) {
+
+		ss_merged = Channel.fromPath(input_dir + "/**.npz")
+			.map { file -> 
+				[ file.name.replaceAll(/.npz$/, ""), file ]
+			}
+			.join(
+				Channel.fromPath(input_dir + "/**.names.txt}")
+					.map { file -> 
+						[ file.name.replaceAll(/.names.txt$/, ""), file ]
+					},
+				by: 0		
+			)			
+
+		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+			.map { file ->
+				def meta = [:]
+				meta.id = file.name.replaceAll(/\.txt$/, "")
+				return tuple(meta, file)
+			}
+
+		samestr_post_merge(ss_merged, mp4_tables)
+
 	}
 
 }
