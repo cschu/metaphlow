@@ -136,17 +136,19 @@ workflow {
 
 	} else if (params.refilter_samestr) {
 
-		ss_merged = Channel.fromPath(input_dir + "/sstr_merge/**.npz")
+		npz_ch = Channel.fromPath(input_dir + "/sstr_merge/**.npz")
 			.map { file -> 
 				[ file.name.replaceAll(/.npz$/, ""), file ]
 			}
-			.join(
-				Channel.fromPath(input_dir + "/sstr_merge/**.names.txt}")
-					.map { file -> 
-						[ file.name.replaceAll(/.names.txt$/, ""), file ]
-					},
-				by: 0		
-			)			
+		names_ch = Channel.fromPath(input_dir + "/sstr_merge/**.names.txt}")
+			.map { file -> 
+				[ file.name.replaceAll(/.names.txt$/, ""), file ]
+			}
+
+		npz_ch.dump(pretty: true, tag: "npz_ch")
+		names_ch.dump(pretty: true, tag: "names_ch")
+
+		ss_merged = npz_ch.join(names_ch, by: 0)						
 
 		mp4_tables = Channel.fromPath(input_dir + "/mp4_profiles/**.mp4.txt")
 			.map { file ->
@@ -154,6 +156,7 @@ workflow {
 				meta.id = file.name.replaceAll(/\.txt$/, "")
 				return tuple(meta, file)
 			}
+		mp4_tables.dump(pretty: true, tag: "mp4_tables_ch")
 
 		ss_merged.dump(pretty: true, tag: "ss_merged")
 
