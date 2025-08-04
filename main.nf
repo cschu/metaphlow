@@ -140,7 +140,7 @@ workflow {
 			.map { file -> 
 				[ file.name.replaceAll(/.npz$/, ""), file ]
 			}
-		names_ch = Channel.fromPath(input_dir + "/sstr_merge/**.names.txt}")
+		names_ch = Channel.fromPath(input_dir + "/sstr_merge/**.names.txt")
 			.map { file -> 
 				[ file.name.replaceAll(/.names.txt$/, ""), file ]
 			}
