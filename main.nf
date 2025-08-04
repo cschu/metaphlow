@@ -136,19 +136,19 @@ workflow {
 
 	} else if (params.refilter_samestr) {
 
-		ss_merged = Channel.fromPath(input_dir + "/**.npz")
+		ss_merged = Channel.fromPath(input_dir + "/sstr_merge/**.npz")
 			.map { file -> 
 				[ file.name.replaceAll(/.npz$/, ""), file ]
 			}
 			.join(
-				Channel.fromPath(input_dir + "/**.names.txt}")
+				Channel.fromPath(input_dir + "/sstr_merge/**.names.txt}")
 					.map { file -> 
 						[ file.name.replaceAll(/.names.txt$/, ""), file ]
 					},
 				by: 0		
 			)			
 
-		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+		mp4_tables = Channel.fromPath(input_dir + "/mp4_profiles/**.mp4.txt")
 			.map { file ->
 				def meta = [:]
 				meta.id = file.name.replaceAll(/\.txt$/, "")
