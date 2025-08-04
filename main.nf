@@ -18,14 +18,11 @@ if (!params.fastq_input_pattern) {
 }
 def fastq_input_pattern = input_dir + "/" + params.fastq_input_pattern
 
-params.skip_alignment = true
-
-params.sstr_profiler = "metaphlan4"
-
 
 workflow {
 
-	if (!params.skip_profiling) {
+	if (params.run_mode == "full") {
+	// if (!params.skip_profiling) {
 
 		fastq_input(
 			Channel.fromPath(input_dir + "/**"),
@@ -53,6 +50,7 @@ workflow {
 
 		alignments = Channel.empty()
 		tax_profiles = Channel.empty()
+
 		if (params.sstr_profiler == "motus") {
 
 			run_motus(fastq_ch, params.motus_db)
@@ -60,24 +58,15 @@ workflow {
 			alignments = run_motus.out.motus_bam
 			tax_profiles = run_motus.out.motus_profile
 
-			// if (params.run_samestr) {
-			// 	samestr_full(
-			// 		run_motus.out.motus_bam,
-			// 		run_motus.out.motus_profile					
-			// 	)
-			// }
-
 		} else {
 
 			run_metaphlan4(fastq_ch, params.mp4_db)
 
-			if (params.mp4_collate || params.run_humann3) {
-				collate_metaphlan4_tables(
-					run_metaphlan4.out.mp4_table
-						.map { sample, table -> return table }
-						.collect()
-				)
-			}
+			collate_metaphlan4_tables(
+				run_metaphlan4.out.mp4_table
+					.map { sample, table -> return table }
+					.collect()
+			)
 
 			if (params.run_humann3) {
 				humann3(
@@ -97,26 +86,15 @@ workflow {
 
 			alignments = run_metaphlan4.out.mp4_sam
 			tax_profiles = run_metaphlan4.out.mp4_table
-
-			// if (params.run_samestr) {
-			// 	samestr_full(
-			// 		run_metaphlan4.out.mp4_sam,
-			// 		run_metaphlan4.out.mp4_table
-			// 	)
-			// }
 			
 		}
 
 		if (params.run_samestr) {
-				samestr_full(
-					alignments,
-					tax_profiles
-				)
-			}
-
-		
+			samestr_full(alignments, tax_profiles)
+		}
       
-    } else if (params.run_samestr) {
+    // } else if (params.run_samestr) {
+	} else if (params.run_mode == "samestr_post_convert") {
 
 		ss_converted = Channel.fromPath(input_dir + "/**.npz")
 			.map { file ->
@@ -134,13 +112,14 @@ workflow {
 
 		samestr_post_convert(ss_converted, mp4_tables)        
 
-	} else if (params.refilter_samestr) {
+	// } else if (params.refilter_samestr) {
+	} else if (params.run_mode == "samestr_post_merge") {
 
-		npz_ch = Channel.fromPath(input_dir + "/sstr_merge/**.npz")
+		npz_ch = Channel.fromPath(input_dir + "/**.npz")
 			.map { file -> 
 				[ file.name.replaceAll(/.npz$/, ""), file ]
 			}
-		names_ch = Channel.fromPath(input_dir + "/sstr_merge/**.names.txt")
+		names_ch = Channel.fromPath(input_dir + "/**.names.txt")
 			.map { file -> 
 				[ file.name.replaceAll(/.names.txt$/, ""), file ]
 			}
