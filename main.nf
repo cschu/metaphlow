@@ -155,6 +155,8 @@ workflow {
 				return tuple(meta, file)
 			}
 
+		ss_merged.dump(pretty: true, tag: "ss_merged")
+
 		samestr_post_merge(ss_merged, mp4_tables)
 
 	}
