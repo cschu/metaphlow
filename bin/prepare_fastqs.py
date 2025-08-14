@@ -93,11 +93,13 @@ def transfer_multifiles(files, dest, remote_input=False, compression=None):
 		if compression in ("gz", "bz2"):
 			# multiple compressed files can just be concatenated
 			logging.debug('transfer_multifiles: compression=%s, remote_input=%s, action=concatenate', compression, remote_input)
+			logging.debug('  cmd: %s', ' '.join(cat_cmd))
 			with open(dest, "wt") as _out:
 				subprocess.run(cat_cmd, stdout=_out)
 		else:
 			# multiple uncompressed files will be cat | gzipped
 			logging.debug('transfer_multifiles: compression=%s, remote_input=%s, action=concatenate+gzip', compression, remote_input)
+			logging.debug('  cmd: %s', ' | '.join((' '.join(cat_cmd), "gzip -c -")))
 			cat_pr = subprocess.Popen(cat_cmd, stdout=subprocess.PIPE)
 			with open(dest, "wt") as _out:
 				subprocess.run(("gzip", "-c", "-"), stdin=cat_pr.stdout, stdout=_out)
@@ -199,12 +201,13 @@ def process_sample(
 			r2 = sorted(f for _, f in r2)
 		else:
 			reads = list(check_pairwise(r1, r2))
-			r1, r2 = zip(*((f1, f2) for f1, f2 in reads if f1 and f2))
-			orphans = [
-				r1 or r2
-				for r1, r2 in reads
-				if r1 is None or r2 is None
-			]
+			if reads:
+				others += [
+					r1 or r2
+					for r1, r2 in reads
+					if r1 is None or r2 is None
+				]
+				r1, r2 = zip(*((f1, f2) for f1, f2 in reads if f1 and f2))
 
 
 		print("R1", r1, file=sys.stderr)

@@ -2,6 +2,29 @@ include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samest
 
 params.samestr_marker_db = "/scratch/schudoma/databases/samestr/mpa_vOct22_CHOCOPhlAnSGB_202212/marker_db/"
 
+workflow samestr_post_merge {
+	take:
+		ss_merged
+		tax_profiles
+	main:
+		run_samestr_filter(ss_merged, params.samestr_marker_db)
+
+		// run_samestr_filter(
+		// 	run_samestr_merge.out.sstr_npy,
+		// 	params.samestr_marker_db
+		// )
+		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+		run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+
+		run_samestr_summarize(
+			run_samestr_compare.out.sstr_compare.collect(),
+			tax_profiles.map { sample, table -> return table }.collect(),
+			params.samestr_marker_db
+		)
+
+
+}
+
 
 workflow samestr_post_convert {
 	take:
@@ -20,18 +43,22 @@ workflow samestr_post_convert {
 
 		// run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
 		run_samestr_merge(ss_converted, params.samestr_marker_db)
-		run_samestr_filter(
-			run_samestr_merge.out.sstr_npy,
-			params.samestr_marker_db
-		)
-		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
-		run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
 
-		run_samestr_summarize(
-			run_samestr_compare.out.sstr_compare.collect(),
-			tax_profiles.map { sample, table -> return table }.collect(),
-			params.samestr_marker_db
-		)
+		samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
+
+
+		// run_samestr_filter(
+		// 	run_samestr_merge.out.sstr_npy,
+		// 	params.samestr_marker_db
+		// )
+		// run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+		// run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+
+		// run_samestr_summarize(
+		// 	run_samestr_compare.out.sstr_compare.collect(),
+		// 	tax_profiles.map { sample, table -> return table }.collect(),
+		// 	params.samestr_marker_db
+		// )
 
 }
 
