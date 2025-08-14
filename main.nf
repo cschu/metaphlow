@@ -25,7 +25,7 @@ workflow {
 	// if (!params.skip_profiling) {
 
 		fastq_input(
-			Channel.fromPath(input_dir + "/**"),
+			Channel.fromPath(fastq_input_pattern),
 			Channel.of(null)
 		)
 
