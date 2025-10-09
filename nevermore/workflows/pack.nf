@@ -88,6 +88,8 @@ workflow nevermore_pack_reads {
 				return [meta, [fastqs].flatten()]
 			}
 
+		merged_single_ch.dump(pretty: true, tag: "merged_single_ch")
+
 		/*	then merge single-read file groups into single files */
 
 		merged_ch = Channel.empty()
