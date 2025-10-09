@@ -128,9 +128,8 @@ process run_samestr_stats {
 
 process collate_samestr_stats {
     publishDir params.output_dir, mode: "copy"
-    tag "collate_samestr_stats"
+    tag "ohm..nom..nom!"
     label "large"
-    label "samestr"
 
     input:
     path(stats_files)
