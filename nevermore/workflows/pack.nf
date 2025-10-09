@@ -61,7 +61,7 @@ workflow nevermore_pack_reads {
 
 		single_reads_ch.paired_end
 			.branch {
-				do_merge: it[0].is_multilib
+				do_merge: it[0].multilib
 				no_merge: true
 			}
 			.set { pe_singles_ch }
