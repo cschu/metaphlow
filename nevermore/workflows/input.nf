@@ -119,7 +119,7 @@ workflow fastq_input {
 
 		check_multilib_ch = prepare_fastqs.out.pairs
 			.mix(prepare_fastqs.out.singles)
-			.groupTuple(by: 0)
+			.groupTuple(by: 0, size: ((params.single_end_libraries) ? 1 : 2), remainder: true)
 			.map { sample_id, reads -> [ sample_id, reads.size() == 2 ] }
 
 		prepped_fastq_ch = prepare_fastqs.out.singles
