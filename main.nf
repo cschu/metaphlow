@@ -34,14 +34,26 @@ workflow {
 		fastq_input_ch.dump(pretty: true, tag: "fastq_input_ch")
 		nevermore_main(fastq_input_ch)
 
-		fastq_ch = nevermore_main.out.fastqs	
+		// nevermore_main.out.fastqs
+		// 	.map { sample, fastqs ->
+		// 		def meta = sample.clone()
+		// 		meta.id = sample.id.replaceAll(/\.singles/, "")
+		// 		return [ meta.id, meta, ]
+		// 	}
+		// 	.branch {
+		// 		do_merge: it[0].multilib
+		// 		no_merge: true
+		// 	}
+		// 	.set { fastq_ch }		
+
+		fastq_ch = nevermore_main.out.fastqs
 
 		fastq_ch = fastq_ch
 			.map { sample, fastqs ->
 				sample_id = sample.id.replaceAll(/\.singles$/, "")
 				return tuple(sample_id, fastqs)
 			}
-			.groupTuple()
+			.groupTuple(size: 2, remainder: true)
 			.map { sample_id, fastqs ->
 				def meta = [:]
 				meta.id = sample_id				
