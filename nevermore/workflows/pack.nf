@@ -79,7 +79,7 @@ workflow nevermore_pack_reads {
 			.groupTuple(by: 0, sort: true, size: se_group_size, remainder: true)
 			.map { sample_id, fastqs ->
 				def meta = [:]
-				meta.id = sample.id
+				meta.id = sample_id
 				meta.is_paired = false
 				meta.library = "paired"
 				meta.merged = true
