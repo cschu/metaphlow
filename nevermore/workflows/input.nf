@@ -127,7 +127,7 @@ workflow fastq_input {
 			.map { sample_id, files, is_multilib -> [ "${sample_id}.singles", files, false, is_multilib ] }
 			.mix(prepare_fastqs.out.pairs
 				.join(check_multilib_ch, by: 0)
-				.map { sample_id, files, is_multilib -> [ sample_ids, files, true, is_multilib ] }
+				.map { sample_id, files, is_multilib -> [ sample_id, files, true, is_multilib ] }
 			)
 			.join(by: 0, library_info_ch)
 			.map { sample_id, files, is_paired, is_multilib, library_is_paired ->
