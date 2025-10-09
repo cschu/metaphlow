@@ -126,6 +126,28 @@ process run_samestr_stats {
     """
 }
 
+process collate_samestr_stats {
+    publishDir params.output_dir, mode: "copy"
+    tag "collate_samestr_stats"
+    label "large"
+    label "samestr"
+
+    input:
+    path(stats_files)
+
+    output:
+    path("sstr_aln_stats.collated.tsv.gz"), emit: sstr_stats
+
+    script:
+    // find . -maxdepth 1 -mindepth 1 -type f -name '*.aln_stats.txt' | sort | xargs -I {} awk -F '\t' -v OFS='\t' -v clade={} 'NR>1 { print gensub(/\.aln_stats.txt/, "", "g", gensub(/.+\//, "", "g", clade)),$0 }' {} | head
+    """
+    head -n 1 ${stats_files[0]} | sed "s/^/Clade\\t/" > sstr_aln_stats.collated.tsv
+    find . -maxdepth 1 -mindepth 1 -name '*.aln_stats.txt' | sort | xargs -I {} awk -F '\\t' -v OFS='\\t' -v clade={} 'NR>1 { print gensub(/\\.aln_stats.txt/, "", "g", gensub(/.+\\//, "", "g", clade)),\$0; }' {} >> sstr_aln_stats.collated.tsv
+    gzip sstr_aln_stats.collated.tsv
+    """
+    
+}
+
 process run_samestr_compare {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2024.09"
