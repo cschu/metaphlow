@@ -53,7 +53,7 @@ workflow {
 				sample_id = sample.id.replaceAll(/\.singles$/, "")
 				return tuple(sample_id, fastqs)
 			}
-			.groupTuple(size: 2, remainder: true)
+			.groupTuple(size: ((params.single_end_libraries) ? 1 : 2), remainder: true)
 			.map { sample_id, fastqs ->
 				def meta = [:]
 				meta.id = sample_id				
