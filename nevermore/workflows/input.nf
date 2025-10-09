@@ -115,27 +115,27 @@ workflow fastq_input {
 
 		library_info_ch = prepare_fastqs.out.library_info
 			.splitCsv(header:false, sep:'\t', strip:true)
-			.map { row -> [ row[0], row[1] ] }
+			.map { row -> [ row[0], row[1], row[2] ] }
 
-		check_multilib_ch = prepare_fastqs.out.pairs
-			.mix(prepare_fastqs.out.singles)
-			.groupTuple(by: 0, size: ((params.single_end_libraries) ? 1 : 2), remainder: true)
-			.map { sample_id, reads -> [ sample_id, reads.size() == 2 ] }
+		// check_multilib_ch = prepare_fastqs.out.pairs
+		// 	.mix(prepare_fastqs.out.singles)
+		// 	.groupTuple(by: 0, size: ((params.single_end_libraries) ? 1 : 2), remainder: true)
+		// 	.map { sample_id, reads -> [ sample_id, reads.size() == 2 ] }
 
 		prepped_fastq_ch = prepare_fastqs.out.singles
-			.join(check_multilib_ch, by: 0)
-			.map { sample_id, files, is_multilib -> [ "${sample_id}.singles", files, false, is_multilib ] }
+			// .join(check_multilib_ch, by: 0)
+			.map { sample_id, files, is_multilib -> [ "${sample_id}.singles", files, false ] }
 			.mix(prepare_fastqs.out.pairs
-				.join(check_multilib_ch, by: 0)
-				.map { sample_id, files, is_multilib -> [ sample_id, files, true, is_multilib ] }
+				// .join(check_multilib_ch, by: 0)
+				.map { sample_id, files, is_multilib -> [ sample_id, files, true ] }
 			)
 			.join(by: 0, library_info_ch)
-			.map { sample_id, files, is_paired, is_multilib, library_is_paired ->
+			.map { sample_id, files, is_paired, library_is_paired, n_parts ->
 				def meta = [:]
 				meta.id = sample_id
 				meta.is_paired = is_paired
 				meta.library = (library_is_paired == "1") ? "paired" : "single"
-				meta.multilib = is_multilib
+				meta.multilib = n_parts != "1"
 				return [ meta, [files].flatten() ]
 			}
 
