@@ -106,6 +106,24 @@ workflow {
 		}
       
     // } else if (params.run_samestr) {
+	} else if (params.run_mode == "samestr_convert") {
+
+		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+			.map { file ->
+				def meta = [:]
+				meta.id = file.name.replaceAll(/\.txt$/, "")
+				return tuple(meta, file)
+			}
+
+		mp4_alignments = Channel.fromPath(input_dir + "/**.sam.bz2")
+			.map { file ->
+				def meta = [:]
+				meta.id = file.name.replaceAll(/\.sam\.bz2$/, "")
+				return tuple(meta, file)
+				}
+
+		samestr_full(mp4_alignments, mp4_tables)
+
 	} else if (params.run_mode == "samestr_post_convert") {
 
 		ss_converted = Channel.fromPath(input_dir + "/**.npz")
