@@ -60,11 +60,6 @@ process prepare_fastqs {
 }
 
 
-
-
-
-
-
 workflow remote_fastq_input {
 	take:
 		fastq_ch
@@ -115,23 +110,23 @@ workflow fastq_input {
 
 		library_info_ch = prepare_fastqs.out.library_info
 			.splitCsv(header:false, sep:'\t', strip:true)
-			.map { row ->
-				return tuple(row[0], row[1])
-			}
+			.map { row -> [ row[0], row[1], row[2] ] }
 
 		prepped_fastq_ch = prepare_fastqs.out.singles
-			.map { sample_id, files -> return tuple("${sample_id}.singles", files, false) }
+			.map { sample_id, files -> [ "${sample_id}.singles", files, false ] }
 			.mix(prepare_fastqs.out.pairs
-				.map { sample_id, files -> return tuple(sample_id, files, true) }
+				.map { sample_id, files -> [ sample_id, files, true ] }
 			)
 			.join(by: 0, library_info_ch)
-			.map { sample_id, files, is_paired, library_is_paired ->
+			.map { sample_id, files, is_paired, library_is_paired, n_parts ->
 				def meta = [:]
 				meta.id = sample_id
 				meta.is_paired = is_paired
 				meta.library = (library_is_paired == "1") ? "paired" : "single"
-				return tuple(meta, [files].flatten())
+				meta.multilib = n_parts != "1"
+				return [ meta, [files].flatten() ]
 			}
+
 		prepped_fastq_ch.dump(pretty: true, tag: "prepped_fastq_ch")
 
 	emit:
@@ -166,4 +161,3 @@ workflow bam_input {
 		bamfiles = bam_ch
 		fastqs = fastq_ch
 }
-
