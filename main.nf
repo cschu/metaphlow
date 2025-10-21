@@ -22,8 +22,7 @@ def fastq_input_pattern = input_dir + "/" + params.fastq_input_pattern
 workflow {
 
 	if (params.run_mode == "full") {
-	// if (!params.skip_profiling) {
-
+	
 		fastq_input(
 			Channel.fromPath(fastq_input_pattern),
 			Channel.of(null)
@@ -33,18 +32,6 @@ workflow {
 
 		fastq_input_ch.dump(pretty: true, tag: "fastq_input_ch")
 		nevermore_main(fastq_input_ch)
-
-		// nevermore_main.out.fastqs
-		// 	.map { sample, fastqs ->
-		// 		def meta = sample.clone()
-		// 		meta.id = sample.id.replaceAll(/\.singles/, "")
-		// 		return [ meta.id, meta, ]
-		// 	}
-		// 	.branch {
-		// 		do_merge: it[0].multilib
-		// 		no_merge: true
-		// 	}
-		// 	.set { fastq_ch }		
 
 		fastq_ch = nevermore_main.out.fastqs
 
@@ -105,7 +92,6 @@ workflow {
 			samestr_full(alignments, tax_profiles)
 		}
       
-    // } else if (params.run_samestr) {
 	} else if (params.run_mode == "samestr_convert") {
 
 		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
@@ -142,7 +128,6 @@ workflow {
 
 		samestr_post_convert(ss_converted, mp4_tables)        
 
-	// } else if (params.refilter_samestr) {
 	} else if (params.run_mode == "samestr_post_merge") {
 
 		npz_ch = Channel.fromPath(input_dir + "/**.npz")
