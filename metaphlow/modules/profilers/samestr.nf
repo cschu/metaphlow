@@ -8,17 +8,25 @@ process run_samestr_convert {
     input:
 		tuple val(sample), path(mp_sam), path(mp_profile)
 		path(marker_db)
+        path(marker_sqlite)
 
     output:
         tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
         tuple val(sample), path("samestr_convert_DONE"), emit: convert_sentinel
 
     script:
+    def keep_intermediates = (params.debug_convert) ? "--keep-tmp-files" : ""
+    def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
+    def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
+    def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
+
     """
     set -e -o pipefail
 
+    ${prep_db}
+
     samestr --verbosity DEBUG \
-    convert \
+    convert ${keep_intermediates} ${sqlite_db} \
         --input-files ${mp_sam} \
         --min-vcov 1 \
         --min-aln-qual 0 \
@@ -26,6 +34,8 @@ process run_samestr_convert {
         --output-dir sstr_convert/ \
         --nprocs ${task.cpus} \
         --tax-profiles-extension .txt
+    
+    ${delete_db}
 
     touch samestr_convert_DONE
     """
@@ -70,6 +80,7 @@ process run_samestr_filter {
     input:
         tuple val(species), path(sstr_npy), path(sstr_names)
 	path(marker_db)
+    path(marker_sqlite)
 
     output:
         tuple \
@@ -81,10 +92,15 @@ process run_samestr_filter {
     script:
     // #    --global-pos-min-n-vcov 10 \
     // #    --sample-pos-min-n-vcov 2 \
+    def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
+    def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
+    def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
+
     """
+    ${prep_db}
 
     samestr --verbosity DEBUG \
-    filter \
+    filter ${sqlite_db} \
         --input-files ${sstr_npy} \
         --input-names ${sstr_names} \
         --output-dir sstr_filter/ \
@@ -97,6 +113,8 @@ process run_samestr_filter {
         --sample-var-min-f-vcov 0.025 \
         --clade-min-samples 1 \
         --nprocs ${task.cpus}
+
+    ${delete_db}
     """
 }
 
@@ -208,5 +226,25 @@ process run_samestr_summarize {
         --tax-profiles-dir ./profiles/ \
         --tax-profiles-extension .txt \
         --output-dir sstr_summarize/
+    """
+}
+
+
+process sstr_tarball {
+    label "samestr_tarball"
+    tag "${procname}"
+    publishDir params.output_dir, mode: "copy"
+
+    input:
+    val(procname)
+    path(files), name: "input/*"
+
+    output:
+    path("*.tar.gz")
+
+    script:
+    """
+    mv -v input ${procname}
+    tar chvzf ${procname}.tar.gz ${procname}
     """
 }

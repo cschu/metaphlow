@@ -1,17 +1,19 @@
 include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize; collate_samestr_stats } from "../modules/profilers/samestr"
-
+include { sstr_tarball as sstr_compare_tarball; sstr_tarball as sstr_filter_tarball; sstr_tarball as sstr_merge_tarball } from "../modules/profilers/samestr"
 
 workflow samestr_post_merge {
 	take:
 		ss_merged
 		tax_profiles
 	main:
-		run_samestr_filter(ss_merged, params.samestr_marker_db)
+		run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
+		// sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.collect())
 
 		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
 		collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
 
 		run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+		// sstr_compare_tarball("sstr_compare", run_samestr_compare.out.sstr_compare.collect())
 
 		run_samestr_summarize(
 			run_samestr_compare.out.sstr_compare.collect(),
@@ -29,6 +31,7 @@ workflow samestr_post_convert {
 		tax_profiles
 	main:
 		run_samestr_merge(ss_converted, params.samestr_marker_db)
+		// sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
 
 		samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
 }
@@ -43,7 +46,8 @@ workflow samestr_full {
 	main:
 		run_samestr_convert(
 			alignments.join(tax_profiles),
-			params.samestr_marker_db
+			params.samestr_marker_db,
+			params.samestr_sqlite
 		)
 
 		grouped_npy_ch = run_samestr_convert.out.sstr_npy
