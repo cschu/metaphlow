@@ -35,7 +35,7 @@ workflow samestr_post_convert {
 		merge_input = ss_converted
 			.map { species, files -> files }
 			.buffer(size: params.merge_batch_size, remainder: true)
-			.map { files -> [ merge_ct++; files.flatten() ] }
+			.map { files -> [ merge_ct++, files.flatten() ] }
 
 		// run_samestr_merge(ss_converted, params.samestr_marker_db)
 		run_samestr_merge(merge_input, params.samestr_marker_db)
@@ -48,7 +48,7 @@ workflow samestr_post_convert {
 			// .map { clade, files -> [ clade, files[0], files[1] ] }
 
 		// samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
-		
+
 		// samestr_post_merge(merge_output, tax_profiles)
 }
 
