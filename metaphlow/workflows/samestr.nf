@@ -42,8 +42,9 @@ workflow samestr_post_convert {
 		// sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
 
 		merge_output = run_samestr_merge.out.sstr_npy
-			.map { files -> [files].flatten() }
-			.map { file -> [file.name, file]}
+			.flatten()
+			// .map { files -> [files].flatten() }
+			// .map { file -> [file.name, file]}
 			.dump(pretty: true, tag: "merge_output")
 			// .map { file -> [file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file] }
 			// .groupTuple(size: 2, sort: true)
