@@ -43,11 +43,11 @@ workflow samestr_post_convert {
 
 		merge_output = run_samestr_merge.out.sstr_npy
 			.flatten()
+			.map { file -> [file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file] }
+			.groupTuple(size: 2, sort: true)
 			// .map { files -> [files].flatten() }
 			// .map { file -> [file.name, file]}
 			.dump(pretty: true, tag: "merge_output")
-			// .map { file -> [file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file] }
-			// .groupTuple(size: 2, sort: true)
 			// .map { clade, files -> [ clade, files[0], files[1] ] }
 
 		// samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
