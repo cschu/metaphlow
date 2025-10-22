@@ -31,10 +31,11 @@ workflow samestr_post_convert {
 		tax_profiles
 	main:
 
+		def merge_ct = 0
 		merge_input = ss_converted
 			.map { species, files -> files }
 			.buffer(size: params.merge_batch_size, remainder: true)
-			.map { files -> files.flatten() }
+			.map { files -> [ merge_ct++; files.flatten() ] }
 
 		// run_samestr_merge(ss_converted, params.samestr_marker_db)
 		run_samestr_merge(merge_input, params.samestr_marker_db)

@@ -44,13 +44,14 @@ process run_samestr_convert {
 process run_samestr_merge {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "${species}"
+    // tag "${species}"
+    tag "batch_${batch_id}"
     label "large"
     label "samestr"
     
     input:
+        tuple val(batch_id), path(sstr_npy)
         // tuple val(species), path(sstr_npy)
-        path(sstr_npy)
 	    path(marker_db)
 
     output:
