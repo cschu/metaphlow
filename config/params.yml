@@ -1,50 +1,22 @@
-# i/o parameters
-# Path to input directory on remote file system
-# remote_input_dir: "/path/to/remote/reads/"
-
-# XOR
-
-# Path to local input directory
-# input_dir: "/path/to/local/reads/"
+# Path to input directory
+input_dir: "/path/to/input/reads/"
 
 # Where are the final results published?
 output_dir: "/path/to/output/directory"
-
-# How are the final results published?
-# By default, files are copied from the work-dir.
-# Valid settings: "copy", "move", "link", "symlink"
-# ATT: "link" does not work on all filesystems, such as some /scratch volumes
-publish_mode: "copy"
 
 
 # workflow parameters
 
 # run preprocessing/qc workflow
-# alternative parameter: skip_preprocessing
 run_preprocessing: true
 
-# run host-decontamination subworkflow
-remove_host: false
-
 # ignore orphan reads after qc
-# vknight: true
-# nevermore: false
-# alternative parameter: keep_orphans
 drop_orphans: false
-
-# ignore chimeric reads (unclassified reads with mate classified as host) after decon
-# vknight: true
-# nevermore: false
-drop_chimeras: false
-
-skip_alignment: true
 
 # qc parameters
 # (also refer to: https://jgi.doe.gov/data-and-tools/bbtools/bb-tools-user-guide/bbduk-guide/)
 
 # minimum read length [bp]
-# NGLess functional profiling: 45
-# 16S GAGA2: 100
 qc_minlen: 45
 
 # bbduk wgs
@@ -53,26 +25,34 @@ qc_minlen: 45
 # ref=?? ktrim=r k=23 mink=11 hdist=1 tpe tbo : right-side k-mer based adapter clipping with 1 mismatch allowed, try overlap-detection (tbo), and trim pairs to same length (tpe) upon adapter detection -- NOTE: ref-parameter is set within workflow
 # ftm=5 : get rid of (n*5)+1st base (last sequencing cycle illumina garbage) -- NOTE: unset for preprocessed data
 # entropy=0.5 entropywindow=50 entropyk=5 : discard low complexity sequences
-qc_params_shotgun: "qtrim=rl trimq=3 maq=21 ktrim=r k=23 mink=11 hdist=1 ftm=5 entropy=0.5 entropywindow=50 entropyk=5 tpe tbo"
+# LEGACY SETTING
+# qc_params_shotgun: "qtrim=rl trimq=3 maq=21 ktrim=r k=23 mink=11 hdist=1 ftm=5 entropy=0.5 entropywindow=50 entropyk=5 tpe tbo"
+# METAPHLAN/SAMESTR-SPECIFIC PARAMETER SETTING
+# mlf=0.5 discard reads if trimmed to < 50% of raw length
+qc_params_shotgun: "maq=3 qtrim=rl trimq=21 ktrim=r k=23 mlf=0.5 mink=11 hdist=1 entropy=0.5 entropywindow=50 entropyk=5 tpe tbo"
 
 
 # decontamination parameters
 
-# path to a kraken2 database for host-removal
-remove_host_kraken2_db: "/g/scb/zeller/schudoma/kraken2/hg38_silva_genome"
+# run host-decontamination subworkflow
+# false or "hostile" (requires hostile_db)
+remove_host: false
 
-# kraken2_min_hit_groups
-kraken2_min_hit_groups: 10
-
+# hostile reference index
+hostile_db: null
 
 # profiling parameters
 
-# run profiling?
-skip_profiling: false
-
 # metaphlan4 database
-mp4_db: "/scratch/schudoma/databases/metaphlan4/mpa_vOct22_CHOCOPhlAnSGB_202212"
+mp4_db: "/path/to/metaphlan4/database"
 
+# samestr database
+samestr_db: "/path/to/samestr/database"
+
+
+# run humann3 (via joint-index)
 run_humann3: true
+
+# humann3 databases
 humann_nuc_db: "/scratch/schudoma/databases/humann/full_chocophlan_db/"
 humann_prot_db: "/scratch/schudoma/databases/humann/uniref90_annotated_v201901b_full/"
