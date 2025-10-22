@@ -59,7 +59,7 @@ process run_samestr_merge {
         //     val(species), \
         //     path("sstr_merge/${species}.npz"), \
         //     path("sstr_merge/${species}.names.txt"), \
-        path("sstr_merge/*.*"), emit: sstr_npy
+        path("sstr_merge/*.{npz,names.txt}"), emit: sstr_npy
 
     script:
     """
