@@ -20,6 +20,7 @@ workflow samestr_post_merge {
 		collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
 
 		compare_input = run_samestr_filter.out.sstr_npy
+			.map { batch_id, samples, sstr_npy -> [samples, sstr_npy] }
 			.flatten()
 			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
 			.groupTuple(size: 2, sort: true)
