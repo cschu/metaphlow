@@ -191,7 +191,7 @@ process run_samestr_compare {
 	    path(marker_db)
 
     output:
-        tuple 
+        tuple \
             path("sstr_compare/${species}.closest.txt"), \
             path("sstr_compare/${species}.fraction.txt"), \
             path("sstr_compare/${species}.overlap.txt"), \
