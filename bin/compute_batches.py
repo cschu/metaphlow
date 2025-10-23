@@ -18,7 +18,12 @@ def main():
 
 	d = {}
 	for f in files:
-		d.setdefault(f[:f.find(".")], []).append(f)
+		with open(f, "rt") as _in:
+			for path in _in.read().rstrip().split("\n"):
+				# /scratch/schudoma/WORK/mpow_ssdev/flow_test/e4/5394ca9f37fb1d77be77d211c6e5e2/sstr_convert/SAMN17485756.mp4/t__SGB1861.SAMN17485756.mp4.npz
+				ff = path[path.rfind("/") + 1:]
+				# clade = ff[:ff.find(".")]
+				d.setdefault(ff[:ff.find(".")], []).append(path)
 
 	fbatch_sizes = {k: len(v) for k, v in d.items()}
 	
@@ -33,7 +38,9 @@ def main():
 	
 	for i, batch in enumerate(batches):
 		for f in batch:
-			print(i, (input_dir / f).resolve(), sep="\t")
+			# print(i, (input_dir / f).resolve(), sep="\t")
+			print(i, f, sep="\t")
+
 
 
 
