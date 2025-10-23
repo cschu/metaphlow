@@ -45,7 +45,7 @@ workflow samestr_post_convert {
 			.flatten()
 			.map { file -> [file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file] }
 			.groupTuple(size: 2, sort: true)
-			.map { clade, files -> [ clade, files[0], files[1] ] }
+			.map { clade, files -> [ clade, files[1], files[0] ] }
 			// .dump(pretty: true, tag: "merge_output")
 
 		// samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
