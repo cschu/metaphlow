@@ -123,7 +123,7 @@ workflow samestr_full {
 			grouped_npy_ch = sstr_convert_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 				.map { item -> [item.batch_id, item.file_path] }
-				.groupTuple(by: 0, size: params.convert_batch_size, remainder: true)
+				.groupTuple(by: 0)
 			samestr_post_convert(grouped_npy_ch, tax_profiles)
 		}
 }
