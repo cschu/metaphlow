@@ -29,12 +29,12 @@ workflow samestr_post_convert {
 		tax_profiles
 	main:
 
-		def merge_ct = 0
+		// def merge_ct = 0
+		// merge_input = ss_converted
+		// 	.map { species, files -> files }
+		// 	.buffer(size: params.merge_batch_size, remainder: true)
+		// 	.map { files -> [ merge_ct++, files.flatten() ] }
 		merge_input = ss_converted
-			.map { species, files -> files }
-			.buffer(size: params.merge_batch_size, remainder: true)
-			.map { files -> [ merge_ct++, files.flatten() ] }
-
 
 		// samestr_buffer("merge", ss_converted.map { species, files -> files }.flatten().collect(), 4000)
 
@@ -65,7 +65,7 @@ process samestr_buffer {
 	val(batchsize)
 
 	output:
-	path("buffer/${procname}.batches.txt")
+	path("buffer/${procname}.batches.txt"), emit: batches
 
 	script:
 	"""
@@ -109,7 +109,12 @@ workflow samestr_full {
 		samestr_buffer("merge", convert_info, 4000)
 
 
+
 		if (!params.stop_after_convert) {
+			grouped_npy_ch = samestr_buffer.out.batches
+				.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
+				.map { item -> [item.batch_id, item.file_path] }
+				.groupTuple(by: 0, size: 4000, remainder: true)
 			samestr_post_convert(grouped_npy_ch, tax_profiles)
 		}
 }
