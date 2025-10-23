@@ -18,10 +18,11 @@ def main():
 
 	d = {}
 	for f in files:
-		if f.endswith(".samestr_convert_clades.txt"):
+		if f.endswith("_clades.txt"):
 			with open(f, "rt") as _in:
 				for path in _in.read().rstrip().split("\n"):
 					# /scratch/schudoma/WORK/mpow_ssdev/flow_test/e4/5394ca9f37fb1d77be77d211c6e5e2/sstr_convert/SAMN17485756.mp4/t__SGB1861.SAMN17485756.mp4.npz
+					# /path/to/t__SGB14039.names.txt
 					ff = path[path.rfind("/") + 1:]
 					# clade = ff[:ff.find(".")]
 					d.setdefault(ff[:ff.find(".")], []).append(path)

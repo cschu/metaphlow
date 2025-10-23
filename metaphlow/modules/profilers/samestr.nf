@@ -63,6 +63,7 @@ process run_samestr_merge {
         //     path("sstr_merge/${species}.npz"), \
         //     path("sstr_merge/${species}.names.txt"), \
         path("sstr_merge/*.{npz,names.txt}"), emit: sstr_npy
+        path("${batch_id}.samestr_merged_clades.txt"), emit: merge_info
 
     script:
     """
@@ -72,6 +73,10 @@ process run_samestr_merge {
         --output-dir sstr_merge/ \
 	    --marker-dir ${marker_db} \
         --nprocs ${task.cpus}
+
+    find \$(pwd)/sstr_merge/ -type f -name '*.npz' > ${batch_id}.samestr_merged_clades.txt
+    find \$(pwd)/sstr_merge/ -type f -name '*.names.txt' > ${batch_id}.samestr_merged_clades.txt
+
     """
         // --clade ${species} \
 }
@@ -186,7 +191,7 @@ process run_samestr_compare {
 	    path(marker_db)
 
     output:
-        tuple \
+        tuple 
             path("sstr_compare/${species}.closest.txt"), \
             path("sstr_compare/${species}.fraction.txt"), \
             path("sstr_compare/${species}.overlap.txt"), \
@@ -256,4 +261,26 @@ process sstr_tarball {
     mv -v input ${procname}
     tar chvzf ${procname}.tar.gz ${procname}
     """
+}
+
+process samestr_buffer {
+	publishDir params.output_dir, mode: "copy"
+	label "samestr_buffer"
+	tag "Generating ${procname} batches..."
+
+	input:
+	val(procname)
+	path(files)
+	val(batchsize)
+
+	output:
+	path("buffer/${procname}.batches.txt"), emit: batches
+
+	script:
+	"""
+	mkdir -p buffer/
+
+	compute_batches.py . ${batchsize} > buffer/${procname}.batches.txt
+	"""
+
 }

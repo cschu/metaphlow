@@ -1,5 +1,7 @@
 include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize; collate_samestr_stats } from "../modules/profilers/samestr"
 include { sstr_tarball as sstr_compare_tarball; sstr_tarball as sstr_filter_tarball; sstr_tarball as sstr_merge_tarball } from "../modules/profilers/samestr"
+include { samestr_buffer as sstr_merge_buffer; samestr_buffer as sstr_filter_buffer } from "../modules/profilers/samestr"
+
 
 workflow samestr_post_merge {
 	take:
@@ -7,10 +9,11 @@ workflow samestr_post_merge {
 		tax_profiles
 	main:
 
-		def filter_ct = 0
+		// def filter_ct = 0
+		// filter_input = ss_merged
+		// 	.buffer(size: params.filter_batch_size, remainder: true)
+		// 	.map { files -> [filter_ct++, files.flatten()] }
 		filter_input = ss_merged
-			.buffer(size: params.filter_batch_size, remainder: true)
-			.map { files -> [filter_ct++, files.flatten()] }
 
 		run_samestr_filter(filter_input, params.samestr_marker_db, params.samestr_sqlite)
 		// run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
@@ -57,41 +60,32 @@ workflow samestr_post_convert {
 		run_samestr_merge(merge_input, params.samestr_marker_db)
 		// sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
 
-		merge_output = run_samestr_merge.out.sstr_npy
-			.flatten()
-			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
-			.groupTuple(size: 2, sort: true)
-			// .map { clade, files -> [ clade, files[1], files[0] ] }
-			.map { clade, files -> [ files[1], files[0] ] }
+		// previous merge
+		// merge_output = run_samestr_merge.out.sstr_npy
+		// 	.flatten()
+		// 	.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
+		// 	.groupTuple(size: 2, sort: true)
+		// 	// .map { clade, files -> [ clade, files[1], files[0] ] }
+		// 	.map { clade, files -> [ files[1], files[0] ] }
 			
 			// .dump(pretty: true, tag: "merge_output")
 
 		// samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
 
+		merge_info = run_samestr_merge.out.merge_info
+			.collect()
+
+		sstr_filter_buffer("filter", merge_info, 8000)
+
+		merge_output = sstr_filter_buffer.out.batches
+			.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
+			.map { item -> [item.batch_id, item.file_path] }
+			.groupTuple(by: 0, size: 8000, remainder: true)
+
 		samestr_post_merge(merge_output, tax_profiles)
 }
 
-process samestr_buffer {
-	publishDir params.output_dir, mode: "copy"
-	label "samestr_buffer"
-	tag "buffering ${procname}..."
 
-	input:
-	val(procname)
-	path(files)
-	val(batchsize)
-
-	output:
-	path("buffer/${procname}.batches.txt"), emit: batches
-
-	script:
-	"""
-	mkdir -p buffer/
-
-	compute_batches.py . ${batchsize} > buffer/${procname}.batches.txt
-	"""
-
-}
 
 
 workflow samestr_full {
@@ -123,12 +117,10 @@ workflow samestr_full {
 				.collect()
 		// convert_info.dump(pretty: true, tag: "convert_info")
 
-		samestr_buffer("merge", convert_info, 4000)
-
-
+		sstr_merge_buffer("merge", convert_info, 4000)
 
 		if (!params.stop_after_convert) {
-			grouped_npy_ch = samestr_buffer.out.batches
+			grouped_npy_ch = sstr_merge_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 				.map { item -> [item.batch_id, item.file_path] }
 				.groupTuple(by: 0, size: 4000, remainder: true)
