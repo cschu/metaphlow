@@ -78,7 +78,7 @@ process run_samestr_merge {
 
 process run_samestr_filter {
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "${species}"
+    tag "${batch_id}"
     label "large"
     label "samestr"
     
@@ -91,6 +91,7 @@ process run_samestr_filter {
     output:
             // val(species), \
         tuple \
+            val(batch_id),
             path("sstr_filter/*.npz"), \
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
@@ -127,23 +128,25 @@ process run_samestr_filter {
 process run_samestr_stats {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "${species}"
+    tag "${batch_id}"
     label "large"
     label "samestr"
     
     input:
-        tuple val(species), path(sstr_npy), path(sstr_names)
-	path(marker_db)
+        // tuple val(species), path(sstr_npy), path(sstr_names)
+        tuple val(batch_id), path(ssty_npy), path(sstr_names)
+	    path(marker_db)
 
     output:
-        path "sstr_stats/${species}.aln_stats.txt", emit: sstr_stats
+        // path "sstr_stats/${species}.aln_stats.txt", emit: sstr_stats
+        path "sstr_stats/*.aln_stats.txt", emit: sstr_stats
 
     script:
     """
     samestr --verbosity DEBUG \
     stats \
-    --input-files ${sstr_npy} \
-    --input-names ${sstr_names} \
+    --input-files *.npz \
+    --input-names *.names.txt \
     --marker-dir ${marker_db} \
     --nprocs ${task.cpus} \
     --output-dir sstr_stats/
