@@ -89,8 +89,8 @@ process run_samestr_filter {
         path(marker_sqlite)
 
     output:
-        tuple \
             // val(species), \
+        tuple \
             path("sstr_filter/*.npz"), \
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
