@@ -48,7 +48,7 @@ process run_samestr_merge {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
     // tag "${species}"
-    tag "batch_${batch_id}"
+    tag "clade_batch_C${batch_id}"
     label "large"
     label "samestr"
     
@@ -83,7 +83,7 @@ process run_samestr_merge {
 
 process run_samestr_filter {
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "batch_${batch_id}"
+    tag "clade_batch_M${batch_id}"
     label "large"
     label "samestr"
     
@@ -100,6 +100,8 @@ process run_samestr_filter {
             path("sstr_filter/*.npz"), \
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
+        tuple val(sample), path("samestr_filter_DONE"), emit: filter_sentinel
+
 
     script:
     // #    --global-pos-min-n-vcov 10 \
@@ -125,6 +127,8 @@ process run_samestr_filter {
         --sample-var-min-f-vcov 0.025 \
         --clade-min-samples 1 \
         --nprocs ${task.cpus}
+
+    touch samestr_filter_DONE
 
     ${delete_db}
     """
