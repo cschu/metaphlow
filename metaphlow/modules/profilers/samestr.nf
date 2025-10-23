@@ -13,6 +13,7 @@ process run_samestr_convert {
     output:
         tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
         tuple val(sample), path("samestr_convert_DONE"), emit: convert_sentinel
+        tuple val(sample), path("${sample}.samestr_convert_clades.txt"), emit: convert_info
 
     script:
     def keep_intermediates = (params.debug_convert) ? "--keep-tmp-files" : ""
@@ -36,6 +37,8 @@ process run_samestr_convert {
         --tax-profiles-extension .txt
     
     ${delete_db}
+
+    find \$(pwd)/sstr_convert/ -type f > ${sample}.samestr_convert_clades.txt
 
     touch samestr_convert_DONE
     """
