@@ -55,7 +55,8 @@ workflow samestr_post_convert {
 
 process samestr_buffer {
 	publishDir params.output_dir, mode: "copy"
-	executor "local"
+	label "samestr_buffer"
+	tag "buffering ${procname}..."
 
 	input:
 	val(procname)
