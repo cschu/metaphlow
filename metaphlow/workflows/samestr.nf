@@ -1,6 +1,6 @@
 include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize; collate_samestr_stats } from "../modules/profilers/samestr"
 include { sstr_tarball as sstr_compare_tarball; sstr_tarball as sstr_filter_tarball; sstr_tarball as sstr_merge_tarball } from "../modules/profilers/samestr"
-include { samestr_buffer as sstr_merge_buffer; samestr_buffer as sstr_filter_buffer } from "../modules/profilers/samestr"
+include { samestr_buffer as sstr_convert_buffer; samestr_buffer as sstr_merge_buffer } from "../modules/profilers/samestr"
 
 
 workflow samestr_post_merge {
@@ -75,9 +75,9 @@ workflow samestr_post_convert {
 		merge_info = run_samestr_merge.out.merge_info
 			.collect()
 
-		sstr_filter_buffer("filter", merge_info, 8000)
+		sstr_merge_buffer("filter", merge_info, 8000)
 
-		merge_output = sstr_filter_buffer.out.batches
+		merge_output = sstr_merge_buffer.out.batches
 			.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 			.map { item -> [item.batch_id, item.file_path] }
 			.groupTuple(by: 0, size: 8000, remainder: true)
@@ -117,10 +117,10 @@ workflow samestr_full {
 				.collect()
 		// convert_info.dump(pretty: true, tag: "convert_info")
 
-		sstr_merge_buffer("merge", convert_info, 4000)
+		sstr_convert_buffer("merge", convert_info, 4000)
 
 		if (!params.stop_after_convert) {
-			grouped_npy_ch = sstr_merge_buffer.out.batches
+			grouped_npy_ch = sstr_convert_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 				.map { item -> [item.batch_id, item.file_path] }
 				.groupTuple(by: 0, size: 4000, remainder: true)
