@@ -20,8 +20,6 @@ workflow samestr_post_merge {
 			tax_profiles.map { sample, table -> return table }.collect(),
 			params.samestr_marker_db
 		)
-
-
 }
 
 
@@ -37,13 +35,15 @@ workflow samestr_post_convert {
 			.buffer(size: params.merge_batch_size, remainder: true)
 			.map { files -> [ merge_ct++, files.flatten() ] }
 
+		samestr_buffer("merge", ss_converted.collect().map { species, files -> files }.flatten(), 4000)
+
 		// run_samestr_merge(ss_converted, params.samestr_marker_db)
 		run_samestr_merge(merge_input, params.samestr_marker_db)
 		// sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
 
 		merge_output = run_samestr_merge.out.sstr_npy
 			.flatten()
-			.map { file -> [file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file] }
+			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
 			.groupTuple(size: 2, sort: true)
 			.map { clade, files -> [ clade, files[1], files[0] ] }
 			// .dump(pretty: true, tag: "merge_output")
@@ -51,6 +51,27 @@ workflow samestr_post_convert {
 		// samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
 
 		samestr_post_merge(merge_output, tax_profiles)
+}
+
+process samestr_buffer {
+	publishDir params.output_dir, mode: "copy"
+	executor "local"
+
+	input:
+	val(procname)
+	path(files)
+	val(batchsize)
+
+	output:
+	path("buffer/${procname}.batches.txt")
+
+	script:
+	"""
+	mkdir -p buffer/
+
+	compute_batches.py . batchsize > buffer/${procname}.batches.txt
+	"""
+
 }
 
 
