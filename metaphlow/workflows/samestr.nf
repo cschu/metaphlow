@@ -26,7 +26,8 @@ workflow samestr_post_merge {
 			.groupTuple(size: 2, sort: true)
 			.map { clade, files -> [ clade, files[1], files[0] ] }
 
-		run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+		// run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+		run_samestr_compare(compare_input, params.samestr_marker_db)
 		// sstr_compare_tarball("sstr_compare", run_samestr_compare.out.sstr_compare.collect())
 
 		run_samestr_summarize(
