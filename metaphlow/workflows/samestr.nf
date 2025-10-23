@@ -75,12 +75,12 @@ workflow samestr_post_convert {
 		merge_info = run_samestr_merge.out.merge_info
 			.collect()
 
-		sstr_merge_buffer("filter", merge_info, 100)
+		sstr_merge_buffer("merge", merge_info, params.merge_batch_size)
 
 		merge_output = sstr_merge_buffer.out.batches
 			.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 			.map { item -> [item.batch_id, item.file_path] }
-			.groupTuple(by: 0, size: 100, remainder: true)
+			.groupTuple(by: 0, size: params.merge_batch_size, remainder: true)
 
 		samestr_post_merge(merge_output, tax_profiles)
 }
@@ -117,13 +117,13 @@ workflow samestr_full {
 				.collect()
 		// convert_info.dump(pretty: true, tag: "convert_info")
 
-		sstr_convert_buffer("merge", convert_info, 4000)
+		sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
 
 		if (!params.stop_after_convert) {
 			grouped_npy_ch = sstr_convert_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 				.map { item -> [item.batch_id, item.file_path] }
-				.groupTuple(by: 0, size: 4000, remainder: true)
+				.groupTuple(by: 0, size: params.convert_batch_size, remainder: true)
 			samestr_post_convert(grouped_npy_ch, tax_profiles)
 		}
 }
