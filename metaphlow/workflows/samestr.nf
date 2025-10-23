@@ -35,7 +35,7 @@ workflow samestr_post_convert {
 			.buffer(size: params.merge_batch_size, remainder: true)
 			.map { files -> [ merge_ct++, files.flatten() ] }
 
-		samestr_buffer("merge", ss_converted.map { species, files -> files }.collect().flatten(), 4000)
+		samestr_buffer("merge", ss_converted.map { species, files -> files }.flatten().collect(), 4000)
 
 		// run_samestr_merge(ss_converted, params.samestr_marker_db)
 		run_samestr_merge(merge_input, params.samestr_marker_db)
