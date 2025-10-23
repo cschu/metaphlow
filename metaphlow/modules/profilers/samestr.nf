@@ -75,7 +75,7 @@ process run_samestr_merge {
         --nprocs ${task.cpus}
 
     find \$(pwd)/sstr_merge/ -type f -name '*.npz' > ${batch_id}.samestr_merged_clades.txt
-    find \$(pwd)/sstr_merge/ -type f -name '*.names.txt' > ${batch_id}.samestr_merged_clades.txt
+    find \$(pwd)/sstr_merge/ -type f -name '*.names.txt' >> ${batch_id}.samestr_merged_clades.txt
 
     """
         // --clade ${species} \
@@ -266,7 +266,7 @@ process sstr_tarball {
 process samestr_buffer {
 	publishDir params.output_dir, mode: "copy"
 	label "samestr_buffer"
-	tag "Generating ${procname} batches..."
+	tag "Generating ${procname} clade batches..."
 
 	input:
 	val(procname)
