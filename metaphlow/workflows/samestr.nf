@@ -35,6 +35,7 @@ workflow samestr_post_convert {
 			.buffer(size: params.merge_batch_size, remainder: true)
 			.map { files -> [ merge_ct++, files.flatten() ] }
 
+
 		// samestr_buffer("merge", ss_converted.map { species, files -> files }.flatten().collect(), 4000)
 
 		// run_samestr_merge(ss_converted, params.samestr_marker_db)
@@ -98,6 +99,15 @@ workflow samestr_full {
 					return tuple(species, file)
 			}
 			.groupTuple(sort: true)
+		
+		convert_info = run_samestr_convert.out.conver_info
+			.join(run_samestr_convert.out.convert_sentinel, by: 0)
+				.map { sample, data, sentinel -> return data }
+				// .collect()
+		convert_info.dump(pretty: true, tag: "convert_info")
+
+		// samestr_buffer("merge", convert_info, 4000)
+
 
 		if (!params.stop_after_convert) {
 			samestr_post_convert(grouped_npy_ch, tax_profiles)

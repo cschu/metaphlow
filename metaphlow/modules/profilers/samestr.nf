@@ -38,7 +38,7 @@ process run_samestr_convert {
     
     ${delete_db}
 
-    find \$(pwd)/sstr_convert/ -type f > ${sample.id}.samestr_convert_clades.txt
+    find \$(pwd)/sstr_convert/ -type f -name '*.npz' > ${sample.id}.samestr_convert_clades.txt
 
     touch samestr_convert_DONE
     """
