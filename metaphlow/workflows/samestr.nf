@@ -24,7 +24,7 @@ workflow samestr_post_merge {
 			.flatten()
 			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
 			.groupTuple(size: 2, sort: true)
-			.map { clade, files -> [ files[1], files[0] ] }
+			.map { clade, files -> [ clade, files[1], files[0] ] }
 
 		run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
 		// sstr_compare_tarball("sstr_compare", run_samestr_compare.out.sstr_compare.collect())

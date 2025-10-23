@@ -78,7 +78,7 @@ process run_samestr_merge {
 
 process run_samestr_filter {
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "${batch_id}"
+    tag "batch_${batch_id}"
     label "large"
     label "samestr"
     
@@ -128,7 +128,7 @@ process run_samestr_filter {
 process run_samestr_stats {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "${batch_id}"
+    tag "batch_${batch_id}"
     label "large"
     label "samestr"
     
