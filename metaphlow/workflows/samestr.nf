@@ -6,7 +6,14 @@ workflow samestr_post_merge {
 		ss_merged
 		tax_profiles
 	main:
-		run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
+
+		def filter_ct = 0
+		filter_input = ss_merged
+			.buffer(size: params.filter_batch_size, remainder: true)
+			.map { files -> [filter_ct++, files.flatten()] }
+
+		run_samestr_filter(filter_input, params.samestr_marker_db, params.samestr_sqlite)
+		// run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
 		// sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.collect())
 
 		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
@@ -46,7 +53,9 @@ workflow samestr_post_convert {
 			.flatten()
 			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
 			.groupTuple(size: 2, sort: true)
-			.map { clade, files -> [ clade, files[1], files[0] ] }
+			// .map { clade, files -> [ clade, files[1], files[0] ] }
+			.map { clade, files -> [ files[1], files[0] ] }
+			
 			// .dump(pretty: true, tag: "merge_output")
 
 		// samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)

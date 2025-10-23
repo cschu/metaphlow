@@ -83,15 +83,16 @@ process run_samestr_filter {
     label "samestr"
     
     input:
-        tuple val(species), path(sstr_npy), path(sstr_names)
-	path(marker_db)
-    path(marker_sqlite)
+        // tuple val(species), path(sstr_npy), path(sstr_names)
+        tuple val(batch_id), path(files)
+	    path(marker_db)
+        path(marker_sqlite)
 
     output:
         tuple \
-            val(species), \
-            path("sstr_filter/${species}.npz"), \
-            path("sstr_filter/${species}.names.txt"), \
+            // val(species), \
+            path("sstr_filter/*.npz"), \
+            path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
 
     script:
@@ -106,8 +107,8 @@ process run_samestr_filter {
 
     samestr --verbosity DEBUG \
     filter ${sqlite_db} \
-        --input-files ${sstr_npy} \
-        --input-names ${sstr_names} \
+        --input-files *.npz \
+        --input-names *.names.txt \
         --output-dir sstr_filter/ \
         --marker-dir ${marker_db} \
         --marker-trunc-len 50 \
