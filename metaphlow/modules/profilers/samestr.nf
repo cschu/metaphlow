@@ -247,12 +247,13 @@ process sstr_tarball {
         path(files), name: "input/*"
 
     output:
-        path("*.tar.gz")
+        path("tarballs/${procname}.tar.gz")
 
     script:
     """
     mv -v input ${procname}
-    tar chvzf ${procname}.tar.gz ${procname}
+    mkdir -p tarballs/
+    tar chvzf tarballs/${procname}.tar.gz ${procname}
     """
 }
 

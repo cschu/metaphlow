@@ -1,5 +1,5 @@
 include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize; collate_samestr_stats } from "../modules/profilers/samestr"
-include { sstr_tarball as sstr_compare_tarball; sstr_tarball as sstr_filter_tarball; sstr_tarball as sstr_merge_tarball } from "../modules/profilers/samestr"
+include { sstr_tarball as sstr_compare_tarball; sstr_tarball as sstr_convert_tarball; sstr_tarball as sstr_filter_tarball; sstr_tarball as sstr_merge_tarball } from "../modules/profilers/samestr"
 include { samestr_buffer as sstr_convert_buffer; samestr_buffer as sstr_merge_buffer } from "../modules/profilers/samestr"
 
 
@@ -74,6 +74,8 @@ workflow samestr_full {
 			params.samestr_marker_db,
 			params.samestr_sqlite
 		)
+
+		sstr_convert_tarball("sstr_convert", run_samestr_convert.out.sstr_npy.map { sample, data -> [data].flatten() },)
 
 		grouped_npy_ch = run_samestr_convert.out.sstr_npy
 			.join(run_samestr_convert.out.convert_sentinel, by: 0)
