@@ -52,7 +52,7 @@ process run_samestr_merge {
     label "samestr"
     
     input:
-        tuple val(batch_id), path(sstr_npy)
+        tuple val(batch_id), val(batch_size), path(sstr_npy)
         path(marker_db)
 
     output:
@@ -81,13 +81,14 @@ process run_samestr_filter {
     label "samestr"
     
     input:
-        tuple val(batch_id), path(files)
+        tuple val(batch_id), val(batch_size), path(files)
 	    path(marker_db)
         path(marker_sqlite)
 
     output:
         tuple \
             val(batch_id),
+            val(batch_size),
             path("sstr_filter/*.npz"), \
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
@@ -133,7 +134,7 @@ process run_samestr_stats {
     label "samestr"
     
     input:
-        tuple val(batch_id), path(ssty_npy), path(sstr_names)
+        tuple val(batch_id), val(batch_size), path(ssty_npy), path(sstr_names)
 	    path(marker_db)
 
     output:

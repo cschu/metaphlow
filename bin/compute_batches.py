@@ -72,9 +72,9 @@ def main():
 			batch_sizes.append(fbsize)
 		
 	
-	for i, batch in enumerate(batches):
+	for i, (batch, bsize) in enumerate(zip(batches, batch_sizes)):
 		for f in batch:
-			print(i, f, sep="\t")
+			print(i, bsize, f, sep="\t")
 		
 
 

@@ -16,7 +16,7 @@ workflow samestr_post_merge {
 		collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
 
 		compare_input = run_samestr_filter.out.sstr_npy
-			.map { batch_id, samples, sstr_npy -> [samples, sstr_npy] }
+			.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy] }
 			.flatten()
 			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
 			.groupTuple(size: 2, sort: true)
@@ -48,8 +48,8 @@ workflow samestr_post_convert {
 		sstr_merge_buffer("merge", merge_info, params.merge_batch_size)
 
 		merge_output = sstr_merge_buffer.out.batches
-			.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
-			.map { item -> [item.batch_id, item.file_path] }
+			.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
+			.map { item -> [item.batch_id, item.batch_size, item.file_path] }
 			.groupTuple(by: 0)
 
 		samestr_post_merge(merge_output, tax_profiles)
@@ -92,8 +92,8 @@ workflow samestr_full {
 			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
 
 			grouped_npy_ch = sstr_convert_buffer.out.batches
-				.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
-				.map { item -> [item.batch_id, item.file_path] }
+				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
+				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
 				.groupTuple(by: 0)
 			samestr_post_convert(grouped_npy_ch, tax_profiles)
 		}
