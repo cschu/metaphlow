@@ -254,7 +254,7 @@ process sstr_tarball {
     """
     mkdir -p tarballs/
     mv input ${procname}
-    tar chvzf -C tarballs/ ${procname}.tar.gz ../${procname}
+    tar -C tarballs/ -chvzf ${procname}.tar.gz ../${procname}
     """
 }
 
