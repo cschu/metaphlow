@@ -75,7 +75,7 @@ workflow samestr_full {
 			params.samestr_sqlite
 		)
 
-		sstr_convert_tarball("sstr_convert", run_samestr_convert.out.sstr_npy.map { sample, data -> [data].flatten() },)
+		sstr_convert_tarball("sstr_convert", run_samestr_convert.out.sstr_npy.map { sample, data -> [data].flatten() }.collect(),)
 
 		grouped_npy_ch = run_samestr_convert.out.sstr_npy
 			.join(run_samestr_convert.out.convert_sentinel, by: 0)
