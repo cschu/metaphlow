@@ -12,10 +12,14 @@ workflow samestr_post_merge {
 		run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
 		// sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.collect())
 
-		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
+		filter_output = run_samestr_filter.out.sstr_npy
+			.join(by: 0, run_samestr_filter.out.filter_sentinel)
+			.map { batch_id, batch_size, samples, sstr_npy, sentinel -> [ batch_id, batch_size, samples, sstr_npy ] }
+
+		run_samestr_stats(filter_output, params.samestr_marker_db)
 		collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
 
-		compare_input = run_samestr_filter.out.sstr_npy
+		compare_input = filter_output
 			.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy] }
 			.flatten()
 			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
