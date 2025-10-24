@@ -207,6 +207,7 @@ process run_samestr_summarize {
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
     label "large"
     label "samestr"
+    tag "Summarising results..."
     
     input:
         path(sstr_data)
@@ -252,7 +253,7 @@ process sstr_tarball {
     script:
     """
     mkdir -p tarballs/
-    tar chvzf tarballs/${procname}.tar.gz ${procname}
+    tar chvzf -C tarballs/ ${procname}.tar.gz ../${procname}
     """
 }
 
