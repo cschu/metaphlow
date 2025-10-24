@@ -239,7 +239,7 @@ process run_samestr_summarize {
 
 process sstr_tarball {
     label "samestr_tarball"
-    tag "${procname}"
+    tag "Generating ${procname} tarballs..."
     publishDir params.output_dir, mode: "copy"
 
     input:

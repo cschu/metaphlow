@@ -10,7 +10,7 @@ workflow samestr_post_merge {
 	main:
 
 		run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
-		// sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.collect())
+		sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy].flatten() }.collect())
 
 		filter_output = run_samestr_filter.out.sstr_npy
 			.join(by: 0, run_samestr_filter.out.filter_sentinel)
