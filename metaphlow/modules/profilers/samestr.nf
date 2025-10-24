@@ -47,21 +47,15 @@ process run_samestr_convert {
 process run_samestr_merge {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    // tag "${species}"
     tag "clade_batch_C${batch_id}"
     label "large"
     label "samestr"
     
     input:
         tuple val(batch_id), path(sstr_npy)
-        // tuple val(species), path(sstr_npy)
-	    path(marker_db)
+        path(marker_db)
 
     output:
-        // tuple \
-        //     val(species), \
-        //     path("sstr_merge/${species}.npz"), \
-        //     path("sstr_merge/${species}.names.txt"), \
         path("sstr_merge/*.{npz,names.txt}"), emit: sstr_npy
         path("${batch_id}.samestr_merged_clades.txt"), emit: merge_info
 
@@ -78,7 +72,6 @@ process run_samestr_merge {
     find \$(pwd)/sstr_merge/ -type f -name '*.names.txt' >> ${batch_id}.samestr_merged_clades.txt
 
     """
-        // --clade ${species} \
 }
 
 process run_samestr_filter {
@@ -88,13 +81,11 @@ process run_samestr_filter {
     label "samestr"
     
     input:
-        // tuple val(species), path(sstr_npy), path(sstr_names)
         tuple val(batch_id), path(files)
 	    path(marker_db)
         path(marker_sqlite)
 
     output:
-            // val(species), \
         tuple \
             val(batch_id),
             path("sstr_filter/*.npz"), \
@@ -142,12 +133,10 @@ process run_samestr_stats {
     label "samestr"
     
     input:
-        // tuple val(species), path(sstr_npy), path(sstr_names)
         tuple val(batch_id), path(ssty_npy), path(sstr_names)
 	    path(marker_db)
 
     output:
-        // path "sstr_stats/${species}.aln_stats.txt", emit: sstr_stats
         path "sstr_stats/*.aln_stats.txt", emit: sstr_stats
 
     script:
@@ -168,13 +157,12 @@ process collate_samestr_stats {
     label "large"
 
     input:
-    path(stats_files)
+        path(stats_files)
 
     output:
-    path("sstr_aln_stats.collated.tsv.gz"), emit: sstr_stats
+        path("sstr_aln_stats.collated.tsv.gz"), emit: sstr_stats
 
     script:
-    // find . -maxdepth 1 -mindepth 1 -type f -name '*.aln_stats.txt' | sort | xargs -I {} awk -F '\t' -v OFS='\t' -v clade={} 'NR>1 { print gensub(/\.aln_stats.txt/, "", "g", gensub(/.+\//, "", "g", clade)),$0 }' {} | head
     """
     head -n 1 ${stats_files[0]} | sed "s/^/Clade\\t/" > sstr_aln_stats.collated.tsv
     find . -maxdepth 1 -mindepth 1 -name '*.aln_stats.txt' | sort | xargs -I {} awk -F '\\t' -v OFS='\\t' -v clade={} 'NR>1 { print gensub(/\\.aln_stats.txt/, "", "g", gensub(/.+\\//, "", "g", clade)),\$0; }' {} >> sstr_aln_stats.collated.tsv
@@ -186,19 +174,19 @@ process collate_samestr_stats {
 process run_samestr_compare {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "${species}"
+    tag "${clade}"
     label "large"
     label "samestr"
     
     input:
-        tuple val(species), path(sstr_npy), path(sstr_names)
+        tuple val(clade), path(sstr_npy), path(sstr_names)
 	    path(marker_db)
 
     output:
         tuple \
-            path("sstr_compare/${species}.closest.txt"), \
-            path("sstr_compare/${species}.fraction.txt"), \
-            path("sstr_compare/${species}.overlap.txt"), \
+            path("sstr_compare/${clade}.closest.txt"), \
+            path("sstr_compare/${clade}.fraction.txt"), \
+            path("sstr_compare/${clade}.overlap.txt"), \
         emit: sstr_compare
 
     script:
@@ -222,7 +210,7 @@ process run_samestr_summarize {
     input:
         path(sstr_data)
         path(mp_profiles)
-	path(marker_db)
+	    path(marker_db)
 
     output:
         tuple \
@@ -254,11 +242,11 @@ process sstr_tarball {
     publishDir params.output_dir, mode: "copy"
 
     input:
-    val(procname)
-    path(files), name: "input/*"
+        val(procname)
+        path(files), name: "input/*"
 
     output:
-    path("*.tar.gz")
+        path("*.tar.gz")
 
     script:
     """
@@ -273,12 +261,12 @@ process samestr_buffer {
 	tag "Generating ${procname} clade batches..."
 
 	input:
-	val(procname)
-	path(files)
-	val(batchsize)
+        val(procname)
+        path(files)
+        val(batchsize)
 
 	output:
-	path("buffer/${procname}.batches.txt"), emit: batches
+	    path("buffer/${procname}.batches.txt"), emit: batches
 
 	script:
     def buffer_criterion = (procname == "convert") ? "count" : "size"

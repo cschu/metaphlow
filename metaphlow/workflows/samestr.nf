@@ -9,14 +9,7 @@ workflow samestr_post_merge {
 		tax_profiles
 	main:
 
-		// def filter_ct = 0
-		// filter_input = ss_merged
-		// 	.buffer(size: params.filter_batch_size, remainder: true)
-		// 	.map { files -> [filter_ct++, files.flatten()] }
-		filter_input = ss_merged
-
-		run_samestr_filter(filter_input, params.samestr_marker_db, params.samestr_sqlite)
-		// run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
+		run_samestr_filter(ss_merged, params.samestr_marker_db, params.samestr_sqlite)
 		// sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.collect())
 
 		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
@@ -29,7 +22,6 @@ workflow samestr_post_merge {
 			.groupTuple(size: 2, sort: true)
 			.map { clade, files -> [ clade, files[1], files[0] ] }
 
-		// run_samestr_compare(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
 		run_samestr_compare(compare_input, params.samestr_marker_db)
 		// sstr_compare_tarball("sstr_compare", run_samestr_compare.out.sstr_compare.collect())
 
@@ -47,30 +39,8 @@ workflow samestr_post_convert {
 		tax_profiles
 	main:
 
-		// def merge_ct = 0
-		// merge_input = ss_converted
-		// 	.map { species, files -> files }
-		// 	.buffer(size: params.merge_batch_size, remainder: true)
-		// 	.map { files -> [ merge_ct++, files.flatten() ] }
-		merge_input = ss_converted
-
-		// samestr_buffer("merge", ss_converted.map { species, files -> files }.flatten().collect(), 4000)
-
-		// run_samestr_merge(ss_converted, params.samestr_marker_db)
-		run_samestr_merge(merge_input, params.samestr_marker_db)
+		run_samestr_merge(ss_converted, params.samestr_marker_db)
 		// sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
-
-		// previous merge
-		// merge_output = run_samestr_merge.out.sstr_npy
-		// 	.flatten()
-		// 	.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
-		// 	.groupTuple(size: 2, sort: true)
-		// 	// .map { clade, files -> [ clade, files[1], files[0] ] }
-		// 	.map { clade, files -> [ files[1], files[0] ] }
-			
-			// .dump(pretty: true, tag: "merge_output")
-
-		// samestr_post_merge(run_samestr_merge.out.sstr_npy, tax_profiles)
 
 		merge_info = run_samestr_merge.out.merge_info
 			.collect()
@@ -80,7 +50,6 @@ workflow samestr_post_convert {
 		merge_output = sstr_merge_buffer.out.batches
 			.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 			.map { item -> [item.batch_id, item.file_path] }
-			// .groupTuple(by: 0, size: params.merge_batch_size, remainder: true)
 			.groupTuple(by: 0)
 
 		samestr_post_merge(merge_output, tax_profiles)
@@ -108,19 +77,20 @@ workflow samestr_full {
 			.flatten()
 			.map { file ->
 					def species = file.name.replaceAll(/[.].*/, "")
-					return tuple(species, file)
+					return [ species, file ]
 			}
 			.groupTuple(sort: true)
 		
-		convert_info = run_samestr_convert.out.convert_info
-			.join(run_samestr_convert.out.convert_sentinel, by: 0)
-				.map { sample, data, sentinel -> return data }
-				.collect()
-		// convert_info.dump(pretty: true, tag: "convert_info")
-
-		sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
 
 		if (!params.stop_after_convert) {
+
+			convert_info = run_samestr_convert.out.convert_info
+				.join(run_samestr_convert.out.convert_sentinel, by: 0)
+					.map { sample, data, sentinel -> return data }
+					.collect()
+
+			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
+
 			grouped_npy_ch = sstr_convert_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 				.map { item -> [item.batch_id, item.file_path] }
