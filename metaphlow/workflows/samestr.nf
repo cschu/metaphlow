@@ -80,7 +80,8 @@ workflow samestr_post_convert {
 		merge_output = sstr_merge_buffer.out.batches
 			.splitCsv(header: ['batch_id', 'file_path'], sep: '\t' )
 			.map { item -> [item.batch_id, item.file_path] }
-			.groupTuple(by: 0, size: params.merge_batch_size, remainder: true)
+			// .groupTuple(by: 0, size: params.merge_batch_size, remainder: true)
+			.groupTuple(by: 0)
 
 		samestr_post_merge(merge_output, tax_profiles)
 }
