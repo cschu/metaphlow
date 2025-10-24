@@ -9,7 +9,7 @@ def main():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("input_dir")
 	ap.add_argument("max_size", type=int)
-	ap.add_argument("criterion", type=str, choice=("count", "size"), default="count")
+	ap.add_argument("criterion", type=str, choices=("count", "size",), default="count")
 	args = ap.parse_args()
 
 	input_dir = pathlib.Path(args.input_dir)
