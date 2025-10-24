@@ -100,7 +100,7 @@ process run_samestr_filter {
             path("sstr_filter/*.npz"), \
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
-        tuple val(sample), path("samestr_filter_DONE"), emit: filter_sentinel
+        tuple val(batch_id), path("samestr_filter_DONE"), emit: filter_sentinel
 
 
     script:
