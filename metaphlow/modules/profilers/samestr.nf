@@ -281,10 +281,11 @@ process samestr_buffer {
 	path("buffer/${procname}.batches.txt"), emit: batches
 
 	script:
+    def buffer_criterion = (procname == "convert") ? "count" : "size"
 	"""
 	mkdir -p buffer/
 
-	compute_batches.py . ${batchsize} > buffer/${procname}.batches.txt
+	compute_batches.py . ${batchsize} ${buffer_criterion} > buffer/${procname}.batches.txt
 	"""
 
 }
