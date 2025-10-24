@@ -75,10 +75,6 @@ def main():
 	for i, (batch, bsize) in enumerate(zip(batches, batch_sizes)):
 		for f in batch:
 			print(i, bsize, f, sep="\t")
-		
-
-
-
 
 
 if __name__ == "__main__":
