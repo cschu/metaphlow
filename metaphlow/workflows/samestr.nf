@@ -44,7 +44,7 @@ workflow samestr_post_convert {
 	main:
 
 		run_samestr_merge(ss_converted, params.samestr_marker_db)
-		// sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
+		sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
 
 		merge_info = run_samestr_merge.out.merge_info
 			.collect()
