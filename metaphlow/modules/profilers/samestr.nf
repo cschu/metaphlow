@@ -244,14 +244,13 @@ process sstr_tarball {
 
     input:
         val(procname)
-        path(files), name: "input/*"
+        path(files), name: "${procname}/*"
 
     output:
         path("tarballs/${procname}.tar.gz")
 
     script:
     """
-    mv -v input ${procname}
     mkdir -p tarballs/
     tar chvzf tarballs/${procname}.tar.gz ${procname}
     """
