@@ -27,7 +27,7 @@ workflow samestr_post_merge {
 			.map { clade, files -> [ clade, files[1], files[0] ] }
 
 		run_samestr_compare(compare_input, params.samestr_marker_db)
-		// sstr_compare_tarball("sstr_compare", run_samestr_compare.out.sstr_compare.collect())
+		sstr_compare_tarball("sstr_compare", run_samestr_compare.out.sstr_compare.collect())
 
 		run_samestr_summarize(
 			run_samestr_compare.out.sstr_compare.collect(),
