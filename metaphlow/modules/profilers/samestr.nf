@@ -137,7 +137,7 @@ process run_samestr_filter {
 process run_samestr_stats {
     publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
-    tag "batch_${batch_id}"
+    tag "clade_batch_M${batch_id}"
     label "large"
     label "samestr"
     

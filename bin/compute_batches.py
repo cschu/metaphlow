@@ -9,6 +9,7 @@ def main():
 	ap = argparse.ArgumentParser()
 	ap.add_argument("input_dir")
 	ap.add_argument("max_size", type=int)
+	ap.add_argument("criterion", type=str, choice=("count", "size"), default="count")
 	args = ap.parse_args()
 
 	input_dir = pathlib.Path(args.input_dir)
@@ -27,21 +28,40 @@ def main():
 					# clade = ff[:ff.find(".")]
 					d.setdefault(ff[:ff.find(".")], []).append(path)
 
-	fbatch_sizes = {k: len(v) for k, v in d.items()}
-	
 	batches = [[]]
-	for fbid, fbsize in fbatch_sizes.items():
-		for batch in batches:
-			if len(batch) + fbsize <= args.max_size:
-				batch += d[fbid]
-				break
-		else:
-			batches.append(d[fbid])
+	if args.criterion == "count":
+		fbatch_sizes = {k: len(v) for k, v in d.items()}
+		
+		for fbid, fbsize in fbatch_sizes.items():
+			for batch in batches:
+				if len(batch) + fbsize <= args.max_size:
+					batch += d[fbid]
+					break
+			else:
+				batches.append(d[fbid])
+	else:
+		batch_sizes = [0]
+		fbatch_sizes = {
+			k: len(open(v[0] if v[0].endswith(".txt") else v[1]).readlines())
+			for k, v in d.items()
+		}
+
+		for fbid, fbsize in fbatch_sizes.items():
+			for i, (batch, bsize) in enumerate(zip(batches, batch_sizes)):
+				if bsize + fbsize <= args.max_size:
+					batch += d[fbid]
+					batch_sizes[i] += fbsize
+					break
+			else:
+				batches.append(d[fbid])
+				batch_sizes.append(fbsize)
+		
 	
 	for i, batch in enumerate(batches):
 		for f in batch:
 			# print(i, (input_dir / f).resolve(), sep="\t")
 			print(i, f, sep="\t")
+		
 
 
 
