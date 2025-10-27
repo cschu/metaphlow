@@ -266,7 +266,7 @@ process sstr_tarball {
     if (procname == "compare") {
         dump_results += "find ${procname} -name '*.txt' | sort | xargs -I {} tar rhf tarballs/${procname}.tar {}\n"
     } else {
-        dump_results += "find ${procname} -name '*.npz' | sort | sed "s/.npz//" > names.txt\n"
+        dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
         dump_results += "cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz\n"
     }
 
