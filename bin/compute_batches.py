@@ -45,16 +45,7 @@ def main():
 
 	if args.criterion == "count":
 		fbatch_sizes = {k: len(v) for k, v in d.items()}
-		
-		# for fbid, fbsize in fbatch_sizes.items():
-		# 	for i, (batch, bsize) in enumerate(zip(batches, batch_sizes)):
-		# 		if bsize + fbsize <= args.max_size:
-		# 			batch += d[fbid]
-		# 			batch_sizes[i] += fbsize
-		# 			break
-		# 	else:
-		# 		batches.append(d[fbid])
-		# 		batch_sizes.append(fbsize)
+
 	else:
 		fbatch_sizes = {
 			k: len(open(v[0] if v[0].endswith(".txt") else v[1]).readlines())
