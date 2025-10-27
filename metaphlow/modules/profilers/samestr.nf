@@ -242,7 +242,7 @@ process sstr_tarball {
     label "samestr_tarball"
     tag "Packing up ${procname} results..."
     publishDir params.output_dir, mode: "copy"
-    stageInMode "copy"   // hate this
+    // stageInMode "copy"   // hate this
 
     input:
         val(procname)
@@ -250,12 +250,20 @@ process sstr_tarball {
 
     output:
         path("tarballs/${procname}.tar.gz")
+        path("tarballs/${procname}.names.txt.gz")
 
     script:
     """
     mkdir -p tarballs/
     mv input ${procname}
-    tar -C tarballs/ -chvzf ${procname}.tar.gz ../${procname}
+
+    find ${procname} -name '*.name.txt' | sort | sed "s/.names.txt//" > names.txt
+
+    cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt | gzip -vc - > tarballs/${procname}.names.txt.gz
+
+    touch tarballs/${procname}.tar
+    cat names.txt | xargs -I {} tar rf tarballs/${procname}.tar {}.npz \;
+    gzip -v tarballs/${procname}.tar
     """
 }
 
