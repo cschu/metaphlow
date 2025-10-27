@@ -242,6 +242,7 @@ process sstr_tarball {
     label "samestr_tarball"
     tag "Packing up ${procname} results..."
     publishDir params.output_dir, mode: "copy"
+    stageInMode "copy"   // hate this
 
     input:
         val(procname)
