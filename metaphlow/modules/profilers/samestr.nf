@@ -255,7 +255,7 @@ process sstr_tarball {
     script:
 
     def dump_manifest = ""
-    if (procname == "convert" || procname == "compare") {
+    if (procname == "sstr_convert" || procname == "sstr_compare") {
         dump_manifest += "touch tarballs/${procname}.names.txt\n"
         dump_manifest += "gzip tarballs/${procname}.names.txt"
     } else {
@@ -263,7 +263,7 @@ process sstr_tarball {
     }
 
     def dump_results = ""
-    if (procname == "compare") {
+    if (procname == "sstr_compare") {
         dump_results += "find ${procname} -name '*.txt' | sort | xargs -I {} tar rhf tarballs/${procname}.tar {}\n"
     } else {
         dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
