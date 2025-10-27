@@ -134,7 +134,7 @@ process run_samestr_stats {
     label "samestr"
     
     input:
-        tuple val(batch_id), val(batch_size), path(ssty_npy), path(sstr_names)
+        tuple val(batch_id), val(batch_size), path(sstr_npy), path(sstr_names)
 	    path(marker_db)
 
     output:
