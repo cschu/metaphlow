@@ -84,7 +84,7 @@ workflow samestr_full {
 		)
 
 		if (!params.skip_convert_tarball) {
-			sstr_convert_tarball("sstr_convert", run_samestr_convert.out.sstr_npy.map { sample, data -> [data].flatten() }.collect(),)
+			sstr_convert_tarball("sstr_convert", run_samestr_convert.out.sstr_npy.map { sample, data -> [data].flatten() }.collect())
 		}
 
 		grouped_npy_ch = run_samestr_convert.out.sstr_npy
