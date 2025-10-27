@@ -262,7 +262,7 @@ process sstr_tarball {
     cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt | gzip -vc - > tarballs/${procname}.names.txt.gz
 
     touch tarballs/${procname}.tar
-    cat names.txt | xargs -I {} tar rf tarballs/${procname}.tar {}.npz \;
+    cat names.txt | xargs -I {} tar rf tarballs/${procname}.tar {}.npz
     gzip -v tarballs/${procname}.tar
     """
 }
