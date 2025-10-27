@@ -256,15 +256,24 @@ process sstr_tarball {
     """
     mkdir -p tarballs/
     mv input ${procname}
-
-    find ${procname} -name '*.name.txt' | sort | sed "s/.names.txt//" > names.txt
-
-    cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt | gzip -vc - > tarballs/${procname}.names.txt.gz
-
     touch tarballs/${procname}.tar
-    cat names.txt | xargs -I {} tar rf tarballs/${procname}.tar {}.npz
+
+    find ${procname} -name '*.npz' | sort | sed "s/.npz//" > names.txt
+    cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz
     gzip -v tarballs/${procname}.tar
     """
+
+    if (procname == "convert") {
+    """
+    touch tarballs/${procname}.names.txt
+    gzip tarballs/${procname}.names.txt
+    """
+    } else {
+
+    """
+    cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt | gzip -vc - > tarballs/${procname}.names.txt.gz
+    """
+    } 
 }
 
 process samestr_buffer {
