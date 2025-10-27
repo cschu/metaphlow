@@ -255,20 +255,20 @@ process sstr_tarball {
 
     def dump_manifest = ""
     if (procname != "sstr_convert" && procname != "sstr_compare") {
-        dump_manifest += "cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt > manifest.txt\n"
-        dump_manifest += "tar rf tarballs/${procname}.tar manifest.txt\n"
+        dump_manifest += "cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt > ${procname}_manifest.txt\n"
+        dump_manifest += "tar rf tarballs/${procname}.tar ${procname}_manifest.txt\n"
     }
     // https://stackoverflow.com/questions/939982/how-do-i-tar-a-directory-of-files-and-folders-without-including-the-directory-it
     def dump_results = ""
     if (procname == "sstr_compare") {
         // find /my/dir/ -type f -o -type l -o -type d | sed s,^/my/dir/,, | tar -czf mydir.tgz --no-recursion -C /my/dir/ -T -
-        dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
+        dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | sort | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
         // dump_results += "find ${procname} -name '*.txt' | sort | xargs -I {} tar rhf tarballs/${procname}.tar {}\n"
         // dump_results += "gzip -v tarballs/${procname}.tar\n"
     } else {
         dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
         // dump_results += "cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz\n"
-        dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | sort | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
+        dump_results += "find ${procname} -mindepth 1 -name '*.npz' | sed s,^${procname}/,, | sort | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
     }
 
     """
