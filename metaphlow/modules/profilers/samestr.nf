@@ -261,11 +261,14 @@ process sstr_tarball {
 
     def dump_results = ""
     if (procname == "sstr_compare") {
-        dump_results += "find ${procname} -name '*.txt' | sort | xargs -I {} tar rhf tarballs/${procname}.tar {}\n"
-        dump_results += "gzip -v tarballs/${procname}.tar\n"
+        // find /my/dir/ -type f -o -type l -o -type d | sed s,^/my/dir/,, | tar -czf mydir.tgz --no-recursion -C /my/dir/ -T -
+        dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | tar -cf tarballs/${procname}.tar --no-recursion -T -\n"
+        // dump_results += "find ${procname} -name '*.txt' | sort | xargs -I {} tar rhf tarballs/${procname}.tar {}\n"
+        // dump_results += "gzip -v tarballs/${procname}.tar\n"
     } else {
         dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
-        dump_results += "cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz\n"
+        // dump_results += "cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz\n"
+        dump_results += "sed s,^${procname}/,, names.txt | tar -cf tarballs/${procname}.tar --no-recursion -T -\n"
     }
 
     """
