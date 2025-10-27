@@ -249,22 +249,20 @@ process sstr_tarball {
         path(files), name: "input/*"
 
     output:
-        path("tarballs/${procname}.tar.gz")
-        path("tarballs/${procname}.names.txt.gz")
+        path("tarballs/${procname}*")
 
     script:
 
     def dump_manifest = ""
-    if (procname == "sstr_convert" || procname == "sstr_compare") {
-        dump_manifest += "touch tarballs/${procname}.names.txt\n"
-        dump_manifest += "gzip tarballs/${procname}.names.txt"
-    } else {
-        dump_manifest += "cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt | gzip -vc - > tarballs/${procname}.names.txt.gz"
+    if (procname != "sstr_convert" && procname != "sstr_compare") {
+        dump_manifest += "cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt > manifest.txt\n"
+        dump_manifest += "tar rf tarballs/${procname}.tar manifest.txt\n"
     }
 
     def dump_results = ""
     if (procname == "sstr_compare") {
         dump_results += "find ${procname} -name '*.txt' | sort | xargs -I {} tar rhf tarballs/${procname}.tar {}\n"
+        dump_results += "gzip -v tarballs/${procname}.tar\n"
     } else {
         dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
         dump_results += "cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz\n"
@@ -276,8 +274,6 @@ process sstr_tarball {
     touch tarballs/${procname}.tar
 
     ${dump_results}
-    
-    gzip -v tarballs/${procname}.tar
 
     ${dump_manifest}
     """
