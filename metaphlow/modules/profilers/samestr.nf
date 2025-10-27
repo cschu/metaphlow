@@ -253,6 +253,15 @@ process sstr_tarball {
         path("tarballs/${procname}.names.txt.gz")
 
     script:
+
+    def dump_manifest = ""
+    if (procname == "convert") {
+        dump_manifest += "touch tarballs/${procname}.names.txt\n"
+        dump_manifest += "gzip tarballs/${procname}.names.txt"
+    } else {
+        dump_manifest += "cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt | gzip -vc - > tarballs/${procname}.names.txt.gz"
+    }
+
     """
     mkdir -p tarballs/
     mv input ${procname}
@@ -261,19 +270,10 @@ process sstr_tarball {
     find ${procname} -name '*.npz' | sort | sed "s/.npz//" > names.txt
     cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz
     gzip -v tarballs/${procname}.tar
-    """
 
-    if (procname == "convert") {
+    ${dump_manifest}
     """
-    touch tarballs/${procname}.names.txt
-    gzip tarballs/${procname}.names.txt
-    """
-    } else {
-
-    """
-    cat names.txt | xargs -I {} awk -v OFS='\\t' '{print FILENAME,\$0}' {}.names.txt | gzip -vc - > tarballs/${procname}.names.txt.gz
-    """
-    } 
+ 
 }
 
 process samestr_buffer {
