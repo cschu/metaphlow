@@ -268,7 +268,7 @@ process sstr_tarball {
     } else {
         dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
         // dump_results += "cat names.txt | xargs -I {} tar rhf tarballs/${procname}.tar {}.npz\n"
-        dump_results += "sed s,^${procname}/,, names.txt | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
+        dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | sort | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
     }
 
     """
