@@ -71,11 +71,13 @@ workflow samestr_post_convert {
 
 workflow samestr_convert {
 	take:
-		profiler_data  // alignments.join(tax_profiles),
+		// profiler_data  // alignments.join(tax_profiles),
+		alignments
+		tax_profiles
 
 	main:
 		run_samestr_convert(
-			profiler_data,
+			alignments.join(tax_profiles),
 			params.samestr_marker_db,
 			params.samestr_sqlite
 		)
@@ -106,8 +108,8 @@ workflow samestr_full {
 
 	take:
 		// alignments
-		// tax_profiles
 		input_ch
+		tax_profiles
 
 	main:
 		// run_samestr_convert(
@@ -130,6 +132,7 @@ workflow samestr_full {
 			samestr_convert(
 				// alignments.join(tax_profiles),
 				input_ch,
+				tax_profiles,
 				params.samestr_marker_db,
 				params.samestr_sqlite
 			)

@@ -96,6 +96,13 @@ workflow {
       
 	} else if (params.run_mode == "samestr_convert") {
 
+		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+			.map { file ->
+				def meta = [:]
+				meta.id = file.name.replaceAll(/\.txt$/, "")
+				return tuple(meta, file)
+			}
+
 		def convert_input = Channel.empty()
 
 		if (params.load_convert_tarball) {
@@ -104,13 +111,6 @@ workflow {
 
 		} else {
 
-			mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
-				.map { file ->
-					def meta = [:]
-					meta.id = file.name.replaceAll(/\.txt$/, "")
-					return tuple(meta, file)
-				}
-
 			mp4_alignments = Channel.fromPath(input_dir + "/**.sam.bz2")
 				.map { file ->
 					def meta = [:]
@@ -118,12 +118,12 @@ workflow {
 					return tuple(meta, file)
 					}
 
-			convert_input = mp4_alignments.join(mp4_tables)
+			convert_input = mp4_alignments //.join(mp4_tables)
 
 		}
 
 
-		// samestr_full(mp4_alignments, mp4_tables)
+		samestr_full(convert_input, mp4_tables)
 		samestr_full(convert_input)
 
 	} else if (params.run_mode == "samestr_post_convert") {
