@@ -89,7 +89,7 @@ workflow nevermore_pack_reads {
 			merge_single_fastqs(merged_single_ch)
 			merged_ch = merge_single_fastqs.out.fastq
 
-		} 
+		}
 
 		/* 	take all single-read files except for the qc-survivors,
 			concat with merged single-read files (takes care of single-end qc-survivors),
