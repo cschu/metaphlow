@@ -21,12 +21,14 @@ if (!params.fastq_input_pattern) {
 def fastq_input_pattern = input_dir + "/" + params.fastq_input_pattern
 
 
-workflow {
+workflow metaphlow_upstream {
+	take:
+		input_fastq_ch
 
-	if (params.run_mode == "full") {
-	
+	main:
 		fastq_input(
-			Channel.fromPath(fastq_input_pattern),
+			// Channel.fromPath(fastq_input_pattern),
+			input_fastq_ch,
 			Channel.of(null)
 		)
 
@@ -49,15 +51,15 @@ workflow {
 				return tuple(meta, [fastqs].flatten())
 			}
 
-		alignments = Channel.empty()
-		tax_profiles = Channel.empty()
+		alignments_ch = Channel.empty()
+		tax_profiles_ch = Channel.empty()
 
 		if (params.sstr_profiler == "motus") {
 
 			run_motus(fastq_ch, params.motus_db)
 
-			alignments = run_motus.out.motus_bam
-			tax_profiles = run_motus.out.motus_profile
+			alignments_ch = run_motus.out.motus_bam
+			tax_profiles_ch = run_motus.out.motus_profile
 
 		} else {
 
@@ -85,95 +87,109 @@ workflow {
 				collate_metaphlan3_tables(mp3_tables_ch.collect())
 			}
 
-			alignments = run_metaphlan4.out.mp4_sam
-			tax_profiles = run_metaphlan4.out.mp4_table
+			alignments_ch = run_metaphlan4.out.mp4_sam
+			tax_profiles_ch = run_metaphlan4.out.mp4_table
 			
 		}
-
-		if (params.run_samestr) {
-			samestr_full(alignments, tax_profiles)
-		}
-      
-	} else if (params.run_mode == "samestr_convert") {
-
-		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
-			.map { file ->
-				def meta = [:]
-				meta.id = file.name.replaceAll(/\.txt$/, "")
-				return tuple(meta, file)
-			}
-
-		def convert_input = Channel.empty()
-
-		if (params.load_convert_tarball) {
-
-			convert_input = Channel.fromPath(params.load_convert_tarball)
-
-		} else {
-
-			mp4_alignments = Channel.fromPath(input_dir + "/**.sam.bz2")
-				.map { file ->
-					def meta = [:]
-					meta.id = file.name.replaceAll(/\.sam\.bz2$/, "")
-					return tuple(meta, file)
-					}
-
-			convert_input = mp4_alignments //.join(mp4_tables)
-
-		}
-
-
-		samestr_full(convert_input, mp4_tables)
-		// samestr_full(convert_input)
-
-	} else if (params.run_mode == "samestr_post_convert") {
-
-		ss_converted = Channel.fromPath(input_dir + "/**.npz")
-			.map { file ->
-					def species = file.name.replaceAll(/[.].*/, "")
-					return tuple(species, file)
-			}
-			.groupTuple(sort: true)
-
-		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
-			.map { file ->
-				def meta = [:]
-				meta.id = file.name.replaceAll(/\.txt$/, "")
-				return tuple(meta, file)
-			}
-
-		samestr_post_convert(ss_converted, mp4_tables)        
-
-	} else if (params.run_mode == "samestr_post_merge") {
-
-		npz_ch = Channel.fromPath(input_dir + "/**.npz")
-			.map { file -> 
-				[ file.name.replaceAll(/.npz$/, ""), file ]
-			}
-		names_ch = Channel.fromPath(input_dir + "/**.names.txt")
-			.map { file -> 
-				[ file.name.replaceAll(/.names.txt$/, ""), file ]
-			}
-
-		npz_ch.dump(pretty: true, tag: "npz_ch")
-		names_ch.dump(pretty: true, tag: "names_ch")
-
-		ss_merged = npz_ch.join(names_ch, by: 0)						
-
-		mp4_tables = Channel.fromPath(input_dir + "/mp4_profiles/**.mp4.txt")
-			.map { file ->
-				def meta = [:]
-				meta.id = file.name.replaceAll(/\.txt$/, "")
-				return tuple(meta, file)
-			}
-		mp4_tables.dump(pretty: true, tag: "mp4_tables_ch")
-
-		ss_merged.dump(pretty: true, tag: "ss_merged")
-
-		samestr_post_merge(ss_merged, mp4_tables)
-
-	}
+	
+	emit:
+		alignments = alignments_ch
+		tax_profiles = tax_profiles_ch
 
 }
 
 
+workflow {
+
+	if (params.run_mode == "full") {
+
+		metaphlow_upstream(Channel.fromPath(fastq_input_pattern))		
+
+		if (params.run_samestr) {
+			samestr_full(metaphlow_upstream.out.alignments, metaphlow_upstream.out.tax_profiles)
+		}
+      
+	} else {
+
+		// mp4_tables = Channel.fromPath(input_dir + "/mp4_profiles/**.mp4.txt")
+		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+			.map { file ->
+				def meta = [:]
+				meta.id = file.name.replaceAll(/\.txt$/, "")
+				return [ meta, file ]
+			}
+		
+		if (params.run_mode == "samestr_convert") {
+
+			convert_input = Channel.empty()
+
+			if (params.load_convert_tarball) {
+
+				convert_input = Channel.fromPath(params.load_convert_tarball)
+
+			} else {
+
+				mp4_alignments = Channel.fromPath(input_dir + "/**.sam.bz2")
+					.map { file ->
+						def meta = [:]
+						meta.id = file.name.replaceAll(/\.sam\.bz2$/, "")
+						return [ meta, file ]
+					}
+
+				convert_input = mp4_alignments
+
+			}
+
+			samestr_full(convert_input, mp4_tables)
+
+		} else {
+
+			npz_ch = Channel.fromPath(input_dir + "/**.npz")
+			
+			if (params.run_mode == "samestr_post_convert") {
+
+				if (params.load_merge_tarball) {
+
+					merge_input_ch = Channel.fromPath(params.load_merge_tarball)
+
+				} else {
+
+					// ss_converted = Channel.fromPath(input_dir + "/**.npz")
+					merge_input_ch = npz_ch
+						.map { file ->
+							def species = file.name.replaceAll(/[.].*/, "")
+							return [ species, file ]
+						}
+						.groupTuple(sort: true)
+
+				}
+
+				samestr_post_convert(npz_ch, mp4_tables)        
+
+			} else if (params.run_mode == "samestr_post_merge") {
+
+				if (params.load_filter_tarball) {
+
+					post_merge_input_ch = Channel.fromPath(params.load_filter_tarball)
+
+				} else {			
+
+					// npz_ch = Channel.fromPath(input_dir + "/**.npz")
+					npz_ch = npz_ch
+						.map { file -> [ file.name.replaceAll(/.npz$/, ""), file ] }
+					names_ch = Channel.fromPath(input_dir + "/**.names.txt")
+						.map { file -> [ file.name.replaceAll(/.names.txt$/, ""), file ] }
+
+					post_merge_input_ch = npz_ch.join(names_ch, by: 0)
+
+				}
+
+				samestr_post_merge(post_merge_input_ch, mp4_tables)
+
+			}
+
+		}
+
+	}	
+
+}
