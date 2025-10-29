@@ -10,7 +10,7 @@ include { run_motus } from "./nevermore/modules/profilers/motus"
 include { humann3 } from "./metaphlow/workflows/humann3"
 include { samestr_full; samestr_post_convert; samestr_post_merge } from "./metaphlow/workflows/samestr"
 
-include { ss_load_convert_tarball } from "./metaphlow/modules/samestr/samestr_load"
+// include { ss_load_convert_tarball } from "./metaphlow/modules/samestr/samestr_load"
 
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
