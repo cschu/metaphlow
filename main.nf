@@ -10,6 +10,8 @@ include { run_motus } from "./nevermore/modules/profilers/motus"
 include { humann3 } from "./metaphlow/workflows/humann3"
 include { samestr_full; samestr_post_convert; samestr_post_merge } from "./metaphlow/workflows/samestr"
 
+include { ss_load_convert_tarball } from "./metaphlow/modules/samestr/samestr_load"
+
 
 def input_dir = (params.input_dir) ? params.input_dir : params.remote_input_dir
 
@@ -94,21 +96,35 @@ workflow {
       
 	} else if (params.run_mode == "samestr_convert") {
 
-		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
-			.map { file ->
-				def meta = [:]
-				meta.id = file.name.replaceAll(/\.txt$/, "")
-				return tuple(meta, file)
-			}
+		def convert_input = Channel.empty()
 
-		mp4_alignments = Channel.fromPath(input_dir + "/**.sam.bz2")
-			.map { file ->
-				def meta = [:]
-				meta.id = file.name.replaceAll(/\.sam\.bz2$/, "")
-				return tuple(meta, file)
+		if (params.load_convert_tarball) {
+
+			convert_input = Channel.fromPath(params.load_convert_tarball)
+
+		} else {
+
+			mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
+				.map { file ->
+					def meta = [:]
+					meta.id = file.name.replaceAll(/\.txt$/, "")
+					return tuple(meta, file)
 				}
 
-		samestr_full(mp4_alignments, mp4_tables)
+			mp4_alignments = Channel.fromPath(input_dir + "/**.sam.bz2")
+				.map { file ->
+					def meta = [:]
+					meta.id = file.name.replaceAll(/\.sam\.bz2$/, "")
+					return tuple(meta, file)
+					}
+
+			convert_input = mp4_alignments.join(mp4_tables)
+
+		}
+
+
+		// samestr_full(mp4_alignments, mp4_tables)
+		samestr_full(convert_input)
 
 	} else if (params.run_mode == "samestr_post_convert") {
 
