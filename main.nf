@@ -124,7 +124,7 @@ workflow {
 
 
 		samestr_full(convert_input, mp4_tables)
-		samestr_full(convert_input)
+		// samestr_full(convert_input)
 
 	} else if (params.run_mode == "samestr_post_convert") {
 
