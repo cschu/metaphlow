@@ -145,12 +145,12 @@ workflow samestr_full {
 		// 	.join(run_samestr_convert.out.convert_sentinel, by: 0)
 		// 	.map { sample, data, sentinel -> return data }
 		// 	.flatten()
-		data = data
-			.map { file ->
-					def species = file.name.replaceAll(/[.].*/, "")
-					return [ species, file ]
-			}
-			.groupTuple(sort: true)
+		// data = data
+		// 	.map { file ->
+		// 			def species = file.name.replaceAll(/[.].*/, "")
+		// 			return [ species, file ]
+		// 	}
+		// 	.groupTuple(sort: true)
 		
 
 		if (!params.stop_after_convert) {
