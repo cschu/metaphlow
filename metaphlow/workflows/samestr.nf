@@ -124,7 +124,7 @@ workflow samestr_full {
 			ss_load_convert_tarball("sstr_convert", input_ch)
 
 			data = ss_load_convert_tarball.out.sstr_npy
-			convert_info = ss_load_convert_tarball.out.convert_info
+			convert_info = ss_load_convert_tarball.out.batch_info
 
 		} else {
 			samestr_convert(
