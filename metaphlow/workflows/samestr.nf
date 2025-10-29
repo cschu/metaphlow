@@ -2,7 +2,7 @@ include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samest
 include { sstr_tarball as sstr_compare_tarball; sstr_tarball as sstr_convert_tarball; sstr_tarball as sstr_filter_tarball; sstr_tarball as sstr_merge_tarball } from "../modules/profilers/samestr"
 include { samestr_buffer as sstr_convert_buffer; samestr_buffer as sstr_merge_buffer } from "../modules/profilers/samestr"
 
-include { ss_load_convert_tarball } from "../modules/profilers/samestr/samestr_load"
+include { ss_load_convert_tarball } from "../modules/profilers/samestr_load"
 
 workflow samestr_post_merge {
 	take:
