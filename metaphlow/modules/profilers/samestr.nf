@@ -260,10 +260,10 @@ process sstr_tarball {
     // https://stackoverflow.com/questions/939982/how-do-i-tar-a-directory-of-files-and-folders-without-including-the-directory-it
     def dump_results = ""
     if (procname == "sstr_compare") {
-        dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | sort | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
+        dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | sort | tar -chf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
     } else {
         dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
-        dump_results += "find ${procname} -mindepth 1 -name '*.npz' | sed s,^${procname}/,, | sort | tar -cf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
+        dump_results += "find ${procname} -mindepth 1 -name '*.npz' | sed s,^${procname}/,, | sort | tar -chf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
     }
 
     """
