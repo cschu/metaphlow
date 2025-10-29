@@ -261,6 +261,7 @@ process sstr_tarball {
     def dump_results = ""
     if (procname == "sstr_compare") {
         dump_results += "find ${procname} -mindepth 1 | sed s,^${procname}/,, | sort | tar -chf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
+        dump_results += "gzip tarballs/${procname}.tar"
     } else {
         dump_results += "find ${procname} -name '*.npz' | sort | sed 's/.npz//' > names.txt\n"
         dump_results += "find ${procname} -mindepth 1 -name '*.npz' | sed s,^${procname}/,, | sort | tar -chf tarballs/${procname}.tar --no-recursion -C ${procname} -T -\n"
