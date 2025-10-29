@@ -24,7 +24,12 @@ workflow samestr_post_merge {
 
 		} else {
 
-			run_samestr_filter(post_merge_input, params.samestr_marker_db, params.samestr_sqlite)
+			filter_input = post_merge_input
+				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
+				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
+				.groupTuple(by: 0)
+
+			run_samestr_filter(filter_input, params.samestr_marker_db, params.samestr_sqlite)
 
 			if (!params.skip_filter_tarball) {
 				sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy].flatten() }.collect())
@@ -87,9 +92,9 @@ workflow samestr_post_convert {
 		sstr_merge_buffer("merge", merge_info, params.merge_batch_size)
 
 		merge_output = sstr_merge_buffer.out.batches
-			.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
-			.map { item -> [item.batch_id, item.batch_size, item.file_path] }
-			.groupTuple(by: 0)
+			// .splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
+			// .map { item -> [item.batch_id, item.batch_size, item.file_path] }
+			// .groupTuple(by: 0)
 
 		samestr_post_merge(merge_output, tax_profiles)
 }
