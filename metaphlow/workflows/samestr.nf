@@ -1,4 +1,5 @@
 include { run_samestr_convert; run_samestr_merge; run_samestr_filter; run_samestr_stats; run_samestr_compare; run_samestr_summarize; collate_samestr_stats } from "../modules/profilers/samestr"
+include { sundance } from "./sundance"
 
 
 workflow samestr_post_merge {
@@ -7,6 +8,10 @@ workflow samestr_post_merge {
 		tax_profiles
 	main:
 		run_samestr_filter(ss_merged, params.samestr_marker_db)
+
+		if (params.run_sundance) {
+			sundance(run_samestr_filter.out.sstr_npy)
+		}
 
 		run_samestr_stats(run_samestr_filter.out.sstr_npy, params.samestr_marker_db)
 		collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
