@@ -1,5 +1,6 @@
 process calc_position_stats {
 	container "registry.git.embl.org/schudoma/sundance-docker:latest"
+	publishDir params.output_dir, mode: "copy"
 
 	input:
 	tuple val(study), val(clade), path(ss_filter_npz)
@@ -18,6 +19,7 @@ process calc_position_stats {
 
 process sfacts_metagenotype {
 	container "registry.git.embl.org/schudoma/sundance-docker:latest"
+	publishDir params.output_dir, mode: "copy"
 
 	input:
 	tuple val(study), val(clade), path(ss_filter_npz)
@@ -31,7 +33,7 @@ process sfacts_metagenotype {
 	"""
 	mkdir -p metagenotype/${study}
 	
-	run_metagenotype.py -i ${ss_filter_npz} -o metagenotype/${study}/${clade}.nc -s ${position_stats} -p ${global_positions}
+	run_metagenotype.py -i ${ss_filter_npz} -o metagenotype/${study}/${clade}.nc -s ${position_stats} -p ${global_positions}/${clade}.tsv
 	"""
 
 
