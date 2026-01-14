@@ -41,8 +41,8 @@ process sfacts_metagenotype {
 }
 
 
--i /g/bork6/schudoma/data_processing/samestr/issue_2867/studies/790/output/sstr_filter/t__SGB17248.npz \
--o /g/bork6/salim/projects/strain_sandbox/metagenotype/study_790/t__SGB17248.nc \
--s /g/bork6/salim/projects/strain_sandbox/position_stats/t__SGB17248.tar.xz \
--m g/bork6/salim/projects/strain_sandbox/position_stats/t__SGB17248/study_790.nc \
--p /g/bork6/salim/projects/strain_sandbox/global_position/t__SGB17248.tsv
+// -i /g/bork6/schudoma/data_processing/samestr/issue_2867/studies/790/output/sstr_filter/t__SGB17248.npz \
+// -o /g/bork6/salim/projects/strain_sandbox/metagenotype/study_790/t__SGB17248.nc \
+// -s /g/bork6/salim/projects/strain_sandbox/position_stats/t__SGB17248.tar.xz \
+// -m g/bork6/salim/projects/strain_sandbox/position_stats/t__SGB17248/study_790.nc \
+// -p /g/bork6/salim/projects/strain_sandbox/global_position/t__SGB17248.tsv
