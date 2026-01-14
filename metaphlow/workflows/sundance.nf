@@ -9,7 +9,7 @@ workflow sundance {
 	main:
 
 	sstr_filter_ch = sstr_filter_ch
-		.map { clade, file -> [ params.study, clade, file ] }
+		.map { clade, npz, names -> [ params.study, clade, npz ] }
 
 	calc_position_stats(sstr_filter_ch)
 
