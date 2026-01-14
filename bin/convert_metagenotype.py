@@ -139,7 +139,7 @@ def main(inpath, outpath, pos_stats, positions=None):
         mgen_ds = (
             raw_xr
             .to_dataset(name='metagenotype')
-            .isin(position=fixed_pos['position'].values)
+            .where(raw_xr["position"].isin(fixed_pos['position'].values))
             .assign(major_nt=('position', fixed_pos['nucleotide'].values))
         )
     else:
