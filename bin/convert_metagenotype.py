@@ -80,7 +80,7 @@ def load_numpy_file(input_file):
 
 def load_statistics(fpath, member=None):
     if member is None:
-        pos_stats = xr.open_dataset(study_stats)
+        pos_stats = xr.open_dataset(fpath)
     else:
         with tarfile.open(fpath, "r:*") as tar:
             with tar.extractfile(member) as src:
