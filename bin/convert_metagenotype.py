@@ -135,11 +135,12 @@ def main(inpath, outpath, pos_stats, positions=None):
 
     # Construct xarray Dataset (also subset to global position if provided)
     if positions is not None:
-        fixed_pos = pd.read_csv(positions, sep='\t', index_col=None)
+        fixed_pos = pd.read_csv(positions, sep='\t', index_col=None)\
+            .isin({"position": raw_xr["position"]})
         mgen_ds = (
             raw_xr
-            .to_dataset(name='metagenotype')
             .where(raw_xr["position"].isin(fixed_pos['position'].values))
+            .to_dataset(name='metagenotype')
             .assign(major_nt=('position', fixed_pos['nucleotide'].values))
         )
     else:
