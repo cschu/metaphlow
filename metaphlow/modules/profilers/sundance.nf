@@ -11,7 +11,7 @@ process calc_position_stats {
 	script:
 	"""
 	mkdir -p sundance/${clade}/
-	calculate_position_stats.py -i ${ss_filter_npz} -o sundance/${clade}/${study}.nc
+	calc_position_stats.py -i ${ss_filter_npz} -o sundance/${clade}/${study}.nc
 	"""
 
 }
@@ -33,7 +33,7 @@ process sfacts_metagenotype {
 	"""
 	mkdir -p metagenotype/${study}
 	
-	run_metagenotype.py -i ${ss_filter_npz} -o metagenotype/${study}/${clade}.nc -s ${position_stats} -p ${global_positions}/${clade}.tsv
+	convert_metagenotype.py -i ${ss_filter_npz} -o metagenotype/${study}/${clade}.nc -s ${position_stats} -p ${global_positions}/${clade}.tsv
 	"""
 
 
