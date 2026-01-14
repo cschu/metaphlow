@@ -1,4 +1,4 @@
-include { calc_position_stats; sfacts_metagenotype } from "../modules/profiles/sundance"
+include { calc_position_stats; sfacts_metagenotype } from "../modules/profilers/sundance"
 
 
 workflow sundance {
