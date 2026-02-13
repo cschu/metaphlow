@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 
 include { classify_sample; classify_sample_with_library_info } from "../modules/functions"
-
+include { bam2fq } from "../modules/converters/bam2fq"
 
 params.bam_input_pattern = "**.bam"	
 
@@ -34,6 +34,9 @@ process transfer_bams {
 
 
 process prepare_fastqs {
+	// container "ghcr.io/astral-sh/uv:python3.14-trixie-slim"
+	// container "registry.git.embl.org/schudoma/portraits_metatraits:latest"
+	container "quay.io/biocontainers/pandas:2.2.1"
 	label "default"
 
 	input:
@@ -153,7 +156,7 @@ workflow bam_input {
 
 		fastq_ch = Channel.empty()
 		if (params.do_bam2fq_conversion) {
-			bam2fq(bam_ch)
+			bam2fq(bam_ch, false)
 			fastq_ch = bam2fq.out.reads
 				.map { classify_sample(it[0].id, it[1]) }
 		}
