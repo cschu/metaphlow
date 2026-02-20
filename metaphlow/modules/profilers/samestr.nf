@@ -127,6 +127,7 @@ process run_samestr_stats {
 }
 
 process collate_samestr_stats {
+    container "quay.io/biocontainers/gawk:5.1.0--2"
     publishDir params.output_dir, mode: "copy"
     tag "ohm..nom..nom!"
     label "large"
