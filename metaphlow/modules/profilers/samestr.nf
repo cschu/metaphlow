@@ -1,3 +1,28 @@
+process failure_guard {
+	errorStrategy "terminate"
+	label "guard"
+	executor "local"
+	maxRetries 0
+
+	input:
+	val(entity_id)
+    val(stage)
+
+	script:
+	"""
+	set -e -o pipefail
+
+	printf "Failed ${stage} step detected.\\n"
+
+	printf "At least one process failed: ${entity_id}\\n"
+
+	printf "Terminating pipeline.\\n"
+
+	exit 1
+	"""
+
+}
+
 process run_samestr_convert {
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
     tag "${sample.id}"
@@ -11,7 +36,7 @@ process run_samestr_convert {
 
     output:
         tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
-        tuple val(sample), path("samestr_convert_DONE"), emit: convert_sentinel
+        tuple val(sample), path("samestr_convert_DONE"), emit: sentinel
 
     script:
     """
@@ -77,13 +102,16 @@ process run_samestr_filter {
             path("sstr_filter/${species}.npz"), \
             path("sstr_filter/${species}.names.txt"), \
         emit: sstr_npy, optional: true
+        tuple val(species), path("samestr_filter_DONE"), emit: sentinel
+
 
     script:
     // #    --global-pos-min-n-vcov 10 \
     // #    --sample-pos-min-n-vcov 2 \
     """
+    set -e -o pipefail
 
-    samestr --verbosity DEBUG \
+    samestr --verbosity DEBUG --random-seed 313 \
     filter \
         --input-files ${sstr_npy} \
         --input-names ${sstr_names} \
@@ -97,6 +125,8 @@ process run_samestr_filter {
         --sample-var-min-f-vcov 0.025 \
         --clade-min-samples 1 \
         --nprocs ${task.cpus}
+
+    touch samestr_filter_DONE
     """
 }
 
@@ -168,7 +198,7 @@ process run_samestr_compare {
 
     script:
     """
-    samestr --verbosity DEBUG \
+    samestr --verbosity DEBUG --random-seed 313 \
     compare \
         --input-files ${sstr_npy} \
         --input-names ${sstr_names} \
