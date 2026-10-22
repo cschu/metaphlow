@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 
 include { classify_sample; classify_sample_with_library_info } from "../modules/functions"
-
+include { bam2fq } from "../modules/converters/bam2fq"
 
 params.bam_input_pattern = "**.bam"	
 
@@ -34,13 +34,15 @@ process transfer_bams {
 
 
 process prepare_fastqs {
+	container "quay.io/biocontainers/pandas:2.2.1"
 	label "default"
+	tag "${sample}"
 
 	input:
 		tuple val(sample), path(files), val(remote_input), val(library_suffix)
 	output:
-		tuple val(sample), path("fastq/${sample}/${sample}*.fastq.{gz,bz2}"), emit: pairs, optional: true
-		tuple val(sample), path("fastq/${sample}.singles/${sample}*.fastq.{gz,bz2}"), emit: singles, optional: true
+		tuple val(sample), path("fastq/${sample}/*.fastq.{gz,bz2}"), emit: pairs, optional: true
+		tuple val(sample), path("fastq/${sample}.singles/*.fastq.{gz,bz2}"), emit: singles, optional: true
 		path("sample_library_info.txt"), emit: library_info
 
   script:
@@ -91,11 +93,28 @@ workflow fastq_input {
 		libsfx
 	
 	main:
+		if (params.input_dir_structure == "flat") {
+			fastq_ch = fastq_ch
+				.map { file -> [ 
+					file.getName()
+						.replaceAll(/\.(fastq|fq)(\.(gz|bz2))?$/, "")
+						.replaceAll(/[._]R?[12]$/, "")
+						.replaceAll(/[._]singles$/, ""),
+					file
+				] }
+
+		} else {
+			fastq_ch = fastq_ch
+				.map { file -> [ file.getParent().getName(), file ] }
+		}
+
 		fastq_ch = fastq_ch
-			.map { file -> return tuple(file.getParent().getName(), file) }
 			.groupTuple(by: 0)
 			.combine(libsfx)
-			.map { sample_id, files, suffix -> return tuple(sample_id, files, (params.remote_input_dir != null || params.remote_input_dir), suffix) }
+			.map { sample_id, files, suffix -> 
+				return [ 
+					((suffix == null) ? sample_id : "${sample_id}.${suffix}"), files, (params.remote_input_dir != null || params.remote_input_dir), null ]
+			}
 
 		if (params.ignore_samples) {
 			ignore_samples = params.ignore_samples.split(",")
@@ -146,14 +165,14 @@ workflow bam_input {
 		bam_ch = bam_ch
 			.map { file ->
 				def sample = file.name.replaceAll(bam_suffix_pattern, "").replaceAll(/\.$/, "")
-				return tuple(sample, file)
+				return [ sample, file ]
 			}
 			.groupTuple(sort: true)
 			.map { classify_sample(it[0], it[1]) }
 
 		fastq_ch = Channel.empty()
 		if (params.do_bam2fq_conversion) {
-			bam2fq(bam_ch)
+			bam2fq(bam_ch, false)
 			fastq_ch = bam2fq.out.reads
 				.map { classify_sample(it[0].id, it[1]) }
 		}

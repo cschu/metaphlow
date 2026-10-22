@@ -112,7 +112,7 @@ def transfer_multifiles(files, dest, remote_input=False, compression=None):
 def process_sample(
 	sample, fastqs, output_dir,
 	fastq_suffix_pattern,
-	remove_suffix=None, remote_input=False,
+	remove_suffix=[], remote_input=False,
 	add_suffix=None,
 ):
 	""" Checks if a set of fastq files in a directory is a valid collection
@@ -177,13 +177,19 @@ def process_sample(
 		prefixes = [re.sub(fastq_suffix_pattern, "", os.path.basename(f)) for f in fastqs]
 		if remove_suffix:
 			# remove suffix pattern if requested
-			prefixes = [re.sub(remove_suffix + r"$", "", p) for p in prefixes]
+			pattern = r"({})".format("|".join(remove_suffix)) + r'$'
+
+			# prefixes = [re.sub(remove_suffix + r"$", "", p) for p in prefixes]
+			prefixes = [re.sub(pattern, "", p) for p in prefixes]
 
 		print("PRE", prefixes, file=sys.stderr)
 
+		def rx_filter(s, x=1):
+			return re.search(r"[._R]" + str(x) + r"$", s) and not re.search(r"(orphan|single)s?", s)
+
 		# partition fastqs into R1, R2, and 'other' sets
-		r1 = [(p, f) for p, f in zip(prefixes, fastqs) if re.search(r"[._R]1$", p)]
-		r2 = [(p, f) for p, f in zip(prefixes, fastqs) if re.search(r"[._R]2$", p)]
+		r1 = [(p, f) for p, f in zip(prefixes, fastqs) if rx_filter(p, x=1)]
+		r2 = [(p, f) for p, f in zip(prefixes, fastqs) if rx_filter(p, x=2)]
 		others = sorted(list(set(fastqs).difference({f for _, f in r1}).difference({f for _, f in r2})))
 
 		if False:
@@ -363,7 +369,8 @@ def main():
 				renamed = process_sample(
 					sample, fastqs, args.output_dir,
 					fastq_file_suffix_pattern,
-					remove_suffix=args.remove_suffix, remote_input=args.remote_input,
+					remove_suffix=args.remove_suffix.split(",") if args.remove_suffix else [],
+					remote_input=args.remote_input,
 					add_suffix=args.add_sample_suffix,
 				)
 			except Exception as e:

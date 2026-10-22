@@ -1,6 +1,7 @@
 process sortmerna {
 	container "quay.io/biocontainers/sortmerna:4.3.6--h9ee0642_0"
 	label "medium"
+	tag "${sample.id}"
 
 	input:
 		tuple val(sample), path(fastqs)
@@ -8,6 +9,7 @@ process sortmerna {
 	output:
 		tuple val(sample), path("no_rrna/${sample.id}/*.fastq.gz"), emit: fastqs, optional: true
 		tuple val(sample), path("rrna/${sample.id}/*.fastq.gz"), emit: rrna_fastqs, optional: true
+		tuple val(sample), path("${sample.id}.SORTMERNA_DONE"), emit: done_sentinel
 	script:
 		def mem_mb = task.memory.toMega()
 
@@ -44,11 +46,32 @@ process sortmerna {
 		// 	mv_output = "mv -v work/out/other.fq.gz no_rrna/${sample.id}/${sample.id}_R1.fastq.gz"
 		// }
 
+		// --workdir work/ --idx-dir \$(dirname \$(readlink ${db}))/index/
+		// def index_dir = ""
+		// def prep_index_dir = ""
+		// def rm_index_dir = ""
+		// if (params.sortmerna_db_location_writeable) {
+		// 	prep_index_dir = "ln -s "
+		// }
+
 		"""
-		mkdir -p work/index/ no_rrna/${sample.id}/ rrna/${sample.id}/
-		sortmerna --fastx --aligned --other --threads ${task.cpus} -m ${mem_mb} --workdir work/ --idx-dir \$(dirname \$(readlink ${db}))/index/ ${reads} ${pe_params} --ref ${db}
+		set -e -o pipefail
+
+		mkdir -p work/ no_rrna/${sample.id}/ rrna/${sample.id}/
+
+		if [[ -d \$(dirname \$(readlink ${db}))/index/ ]]; then 
+			ln -sf \$(dirname \$(readlink ${db}))/index work/
+		else
+			mkdir -p work/index/
+		fi
+
+
+		sortmerna --fastx --aligned --other --threads ${task.cpus} -m ${mem_mb} --workdir work/ --idx-dir work/index ${reads} ${pe_params} --ref ${db}
 
 		${mv_output}
+		rm -rfv work
+
+		touch ${sample.id}.SORTMERNA_DONE
 		"""
 
 }

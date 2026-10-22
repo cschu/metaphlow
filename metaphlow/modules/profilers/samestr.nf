@@ -1,3 +1,28 @@
+process failure_guard {
+	errorStrategy "terminate"
+	label "guard"
+	executor "local"
+	maxRetries 0
+
+	input:
+	val(entity_id)
+    val(stage)
+
+	script:
+	"""
+	set -e -o pipefail
+
+	printf "Failed ${stage} step detected.\\n"
+
+	printf "At least one process failed: ${entity_id}\\n"
+
+	printf "Terminating pipeline.\\n"
+
+	exit 1
+	"""
+
+}
+
 process run_samestr_convert {
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
     tag "${sample.id}"
@@ -12,7 +37,7 @@ process run_samestr_convert {
 
     output:
         tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
-        tuple val(sample), path("samestr_convert_DONE"), emit: convert_sentinel
+        tuple val(sample), path("samestr_convert_DONE"), emit: sentinel
         tuple val(sample), path("${sample.id}.samestr_convert_clades.txt"), emit: convert_info
 
     script:
@@ -92,7 +117,7 @@ process run_samestr_filter {
             path("sstr_filter/*.npz"), \
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
-        tuple val(batch_id), path("samestr_filter_DONE"), emit: filter_sentinel
+        tuple val(species), path("samestr_filter_DONE"), emit: sentinel
 
 
     script:
@@ -103,9 +128,10 @@ process run_samestr_filter {
     def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
 
     """
+    set -e -o pipefail
     ${prep_db}
 
-    samestr --verbosity DEBUG \
+    samestr --verbosity DEBUG --random-seed 313 \
     filter ${sqlite_db} \
         --input-files *.npz \
         --input-names *.names.txt \
@@ -153,6 +179,7 @@ process run_samestr_stats {
 }
 
 process collate_samestr_stats {
+    container "quay.io/biocontainers/gawk:5.1.0--2"
     publishDir params.output_dir, mode: "copy"
     tag "ohm..nom..nom!"
     label "large"
@@ -192,7 +219,7 @@ process run_samestr_compare {
 
     script:
     """
-    samestr --verbosity DEBUG \
+    samestr --verbosity DEBUG --random-seed 313 \
     compare \
         --input-files ${sstr_npy} \
         --input-names ${sstr_names} \
