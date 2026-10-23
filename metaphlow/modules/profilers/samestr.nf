@@ -146,6 +146,14 @@ process run_samestr_filter {
         --clade-min-samples 1 \
         --nprocs ${task.cpus}
 
+    samestr --verbosity DEBUG \
+    stats \
+    --input-files sstr_filter/*.npz \
+    --input-names sstr_filter/*.names.txt \
+    --marker-dir ${marker_db} \
+    --nprocs ${task.cpus} \
+    --output-dir sstr_stats/
+
     touch samestr_filter_DONE
 
     ${delete_db}
