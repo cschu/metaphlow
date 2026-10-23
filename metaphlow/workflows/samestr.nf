@@ -71,8 +71,8 @@ workflow samestr_post_merge {
 
 		}
 
-		run_samestr_stats(filtered_ch, params.samestr_marker_db)
-		collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
+		// route filtered data to downstream processes
+		collate_samestr_stats(run_samestr_filter.out.sstr_stats.collect())
 
 		compare_input = filtered_ch
 			.map { batch_id, batch_size, samples, sstr_npy -> [ samples, sstr_npy ] }

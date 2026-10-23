@@ -118,6 +118,7 @@ process run_samestr_filter {
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
         tuple val(species), path("samestr_filter_DONE"), emit: sentinel
+        path "sstr_stats/${species}.aln_stats.txt", emit: sstr_stats, optional: true
 
 
     script:
@@ -146,13 +147,16 @@ process run_samestr_filter {
         --clade-min-samples 1 \
         --nprocs ${task.cpus}
 
-    samestr --verbosity DEBUG \
-    stats \
-    --input-files sstr_filter/*.npz \
-    --input-names sstr_filter/*.names.txt \
-    --marker-dir ${marker_db} \
-    --nprocs ${task.cpus} \
-    --output-dir sstr_stats/
+
+    if [[ -d sstr_filter ]] && [[ ! -z "\$(ls sstr_filter/*.names.txt)" ]] && [[ ! -z "\$(ls sstr_filter/*.npz)" ]]; then
+        samestr --verbosity DEBUG \
+        stats \
+        --input-files sstr_filter/*.npz \
+        --input-names sstr_filter/*.names.txt \
+        --marker-dir ${marker_db} \
+        --nprocs ${task.cpus} \
+        --output-dir sstr_stats/
+    fi
 
     touch samestr_filter_DONE
 
