@@ -128,7 +128,7 @@ process run_samestr_filter {
         --nprocs ${task.cpus}
 
 
-    if [[ -d sstr_filter ]] && [[ ! -z "\$(ls -A sstr_filter )" ]]; then
+    if [[ -d sstr_filter ]] && [[ ! -z "\$(ls sstr_filter/*.names.txt)" ]] && [[ ! -z "\$(ls sstr_filter/*.npz)" ]]; then
         samestr --verbosity DEBUG \
         stats \
         --input-files sstr_filter/*.npz \
