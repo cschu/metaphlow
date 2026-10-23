@@ -39,8 +39,9 @@ workflow samestr_post_merge {
 		filtered_ch.dump(pretty: true, tag: "filtered_ch")
 
 		// route filtered data to downstream processes
-		run_samestr_stats(filtered_ch, params.samestr_marker_db)
-		collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
+		//run_samestr_stats(filtered_ch, params.samestr_marker_db)
+		// collate_samestr_stats(run_samestr_stats.out.sstr_stats.collect())
+		collate_samestr_stats(run_samestr_filter.out.sstr_stats.collect())
 
 		run_samestr_compare(filtered_ch, params.samestr_marker_db)
 
