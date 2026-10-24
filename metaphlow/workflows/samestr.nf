@@ -31,7 +31,7 @@ workflow samestr_post_merge {
 				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
 				.groupTuple(by: 0)
 
-			run_samestr_filter(filter_input, params.samestr_marker_db, params.samestr_sqlite)
+			run_samestr_filter(filter_input, params.samestr_marker_db)
 
 			// for each pre-filtered clade "snp matrix"
 			filter_input
@@ -137,8 +137,7 @@ workflow samestr_convert {
 	main:
 		run_samestr_convert(
 			alignments.join(tax_profiles),
-			params.samestr_marker_db,
-			params.samestr_sqlite
+			params.samestr_marker_db
 		)
 
 		// for each tax profile, check if the convert run was successful
@@ -206,8 +205,7 @@ workflow samestr_full {
 			samestr_convert(
 				input_ch,
 				tax_profiles,
-				params.samestr_marker_db,
-				params.samestr_sqlite
+				params.samestr_marker_db
 			)
 
 			convert_info = samestr_convert.batch_info

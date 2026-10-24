@@ -33,7 +33,7 @@ process run_samestr_convert {
     input:
 		tuple val(sample), path(mp_sam), path(mp_profile)
 		path(marker_db)
-        path(marker_sqlite)
+        // path(marker_sqlite)
 
     output:
         tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
@@ -42,17 +42,15 @@ process run_samestr_convert {
 
     script:
     def keep_intermediates = (params.debug_convert) ? "--keep-tmp-files" : ""
-    def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
-    def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
-    def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
+    // def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
+    //def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
+    //def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
 
     """
     set -e -o pipefail
 
-    ${prep_db}
-
     samestr --verbosity DEBUG \
-    convert ${keep_intermediates} ${sqlite_db} \
+    convert ${keep_intermediates} \
         --input-files ${mp_sam} \
         --min-vcov 1 \
         --min-aln-qual 0 \
@@ -61,8 +59,6 @@ process run_samestr_convert {
         --nprocs ${task.cpus} \
         --tax-profiles-extension .txt
     
-    ${delete_db}
-
     find \$(pwd)/sstr_convert/ -type f -name '*.npz' > ${sample.id}.samestr_convert_clades.txt
 
     touch samestr_convert_DONE
