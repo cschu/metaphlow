@@ -205,7 +205,7 @@ workflow samestr_full {
 			samestr_convert(
 				input_ch,
 				tax_profiles,
-				params.samestr_marker_db
+				// params.samestr_marker_db
 			)
 
 			convert_info = samestr_convert.batch_info
