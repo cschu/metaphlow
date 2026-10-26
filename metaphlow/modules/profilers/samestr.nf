@@ -104,7 +104,7 @@ process run_samestr_filter {
     input:
         tuple val(batch_id), val(batch_size), path(files)
 	    path(marker_db)
-        path(marker_sqlite)
+        // path(marker_sqlite)
 
     output:
         tuple \
@@ -120,16 +120,15 @@ process run_samestr_filter {
     script:
     // #    --global-pos-min-n-vcov 10 \
     // #    --sample-pos-min-n-vcov 2 \
-    def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
-    def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
-    def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
+    // def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
+    // def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
+    // def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
 
     """
     set -e -o pipefail
-    ${prep_db}
-
+    
     samestr --verbosity DEBUG --random-seed 313 \
-    filter ${sqlite_db} \
+    filter \
         --input-files *.npz \
         --input-names *.names.txt \
         --output-dir sstr_filter/ \
