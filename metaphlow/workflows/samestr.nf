@@ -208,7 +208,7 @@ workflow samestr_full {
 				// params.samestr_marker_db
 			)
 
-			convert_info = samestr_convert.batch_info
+			convert_info = samestr_convert.out.batch_info
 		}
 
 		if (!params.stop_after_convert) {
