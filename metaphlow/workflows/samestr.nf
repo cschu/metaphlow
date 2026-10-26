@@ -182,6 +182,7 @@ workflow samestr_convert {
 		convert_info_ch = grouped_npy_ch
 			.map { species, files -> files }
 			.flatten()
+			.collect()
 
 	
 	emit:
