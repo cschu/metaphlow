@@ -30,7 +30,7 @@ workflow samestr_post_merge {
 				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
 				.map { item -> [item.batch_id, item.batch_size, file(item.file_path)] }
 				.groupTuple(by: [0, 1])
-				.map { key, files -> [ key[0], key[1], files.flatten() ] }
+				// .map { key, files -> [ key[0], key[1], files.flatten() ] }
 
 			filter_input.dump(pretty: true, tag: "filter_input")
 
