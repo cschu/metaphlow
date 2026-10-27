@@ -175,14 +175,14 @@ workflow samestr_convert {
 			// group by species
 			.groupTuple(sort: true)
 
-		// convert_info = run_samestr_convert.out.convert_info
-		// 	.join(run_samestr_convert.out.convert_sentinel, by: 0)
-		// 	.map { sample, data, sentinel -> return data }
-		// 	.collect()
-		convert_info_ch = grouped_npy_ch
-			.map { species, files -> files }
-			.flatten()
+		convert_info = run_samestr_convert.out.convert_info
+			.join(run_samestr_convert.out.convert_sentinel, by: 0)
+			.map { sample, data, sentinel -> return data }
 			.collect()
+		// convert_info_ch = grouped_npy_ch
+		// 	.map { species, files -> files }
+		// 	.flatten()
+		// 	.collect()
 
 	
 	emit:
