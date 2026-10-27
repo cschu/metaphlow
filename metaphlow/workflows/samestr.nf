@@ -127,8 +127,6 @@ workflow samestr_post_convert {
 
 			run_samestr_merge(input_ch, params.samestr_marker_db)
 
-			/* TEMPORARY BAN */
-			/*
 			if (!params.skip_merge_tarball) {
 				sstr_merge_tarball(
 					"sstr_merge",
@@ -138,6 +136,8 @@ workflow samestr_post_convert {
 					// run_samestr_merge.out.sstr_npy.collect()
 				)
 			}
+			/* TEMPORARY BAN */
+			/*
 			*/
 
 			merge_info = run_samestr_merge.out.merge_info.collect()
