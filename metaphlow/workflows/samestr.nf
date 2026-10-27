@@ -29,7 +29,8 @@ workflow samestr_post_merge {
 			filter_input = post_merge_input
 				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
 				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
-				.groupTuple(by: 0)
+				.groupTuple(by: [0, 1])
+				.map { key, files -> key[0], key[1], files }
 
 			run_samestr_filter(filter_input, params.samestr_marker_db)
 
