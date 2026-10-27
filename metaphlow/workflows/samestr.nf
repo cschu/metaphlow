@@ -175,7 +175,7 @@ workflow samestr_convert {
 			// group by species
 			.groupTuple(sort: true)
 
-		convert_info = run_samestr_convert.out.convert_info
+		convert_info_ch = run_samestr_convert.out.convert_info
 			.join(run_samestr_convert.out.sentinel, by: 0)
 			.map { sample, data, sentinel -> return data }
 			.collect()
