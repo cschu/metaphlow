@@ -76,15 +76,10 @@ workflow samestr_post_merge {
 			// filter_output = run_samestr_filter.out.sstr_npy
 			// 	.join(by: 0, run_samestr_filter.out.filter_sentinel)
 			// 	.map { batch_id, batch_size, samples, sstr_npy, sentinel -> [ batch_id, batch_size, samples, sstr_npy ] }
-			/* TEMPORARY BAN */
-			/*
-			*/
 
 		}
 
 		
-		/* TEMPORARY BAN */
-		/*
 		// route filtered data to downstream processes
 		collate_samestr_stats(run_samestr_filter.out.sstr_stats.collect())
 
@@ -107,6 +102,8 @@ workflow samestr_post_merge {
 			tax_profiles.map { sample, table -> return table }.collect(),
 			params.samestr_marker_db
 		)
+		/* TEMPORARY BAN */
+		/*
 		*/
 }
 
@@ -136,9 +133,6 @@ workflow samestr_post_convert {
 					// run_samestr_merge.out.sstr_npy.collect()
 				)
 			}
-			/* TEMPORARY BAN */
-			/*
-			*/
 
 			merge_info = run_samestr_merge.out.merge_info.collect()
 
