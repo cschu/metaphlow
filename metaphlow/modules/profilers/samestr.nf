@@ -154,8 +154,6 @@ process run_samestr_filter {
     fi
 
     touch samestr_filter_DONE
-
-    ${delete_db}
     """
 }
 
