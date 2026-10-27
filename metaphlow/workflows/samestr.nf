@@ -32,6 +32,8 @@ workflow samestr_post_merge {
 				.groupTuple(by: [0, 1])
 				.map { key, files -> [ key[0], key[1], files ] }
 
+			filter_input.dump(pretty: true, tag: "filter_input")
+
 			run_samestr_filter(filter_input, params.samestr_marker_db)
 
 			// for each pre-filtered clade "snp matrix"
