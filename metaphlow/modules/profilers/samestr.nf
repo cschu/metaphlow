@@ -114,7 +114,7 @@ process run_samestr_filter {
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
         tuple val(species), path("samestr_filter_DONE"), emit: sentinel
-        path "sstr_stats/${species}.aln_stats.txt", emit: sstr_stats, optional: true
+        path "sstr_stats/*.aln_stats.txt", emit: sstr_stats, optional: true
 
 
     script:
