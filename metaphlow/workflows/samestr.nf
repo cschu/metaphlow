@@ -37,6 +37,8 @@ workflow samestr_post_merge {
 
 			run_samestr_filter(filter_input, params.samestr_marker_db)
 
+			/* TEMPORARY BAN */
+			/*
 			// for each pre-filtered clade "snp matrix"
 			filter_input
 				.map { batch_id, batch_size, files, sentinel -> [ batch_id, sentinel ] }
@@ -75,8 +77,6 @@ workflow samestr_post_merge {
 			// filter_output = run_samestr_filter.out.sstr_npy
 			// 	.join(by: 0, run_samestr_filter.out.filter_sentinel)
 			// 	.map { batch_id, batch_size, samples, sstr_npy, sentinel -> [ batch_id, batch_size, samples, sstr_npy ] }
-			/* TEMPORARY BAN */
-			/*
 			*/
 
 		}
