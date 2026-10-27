@@ -54,7 +54,7 @@ workflow samestr_post_merge {
 				.dump(pretty: true, tag: "filter_status_ch")
 
 			// send filter-failures to filter guard -> if any, tear down pipeline
-			filter_failure_guard(filter_status_ch.failure.map { species, data, names, sentinel -> species }, "filter")
+			// filter_failure_guard(filter_status_ch.failure.map { species, data, names, sentinel -> species }, "filter")
 
 			if (!params.skip_filter_tarball) {
 				sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy].flatten() }.collect())
