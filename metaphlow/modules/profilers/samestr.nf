@@ -37,8 +37,9 @@ process run_samestr_convert {
 
     output:
         tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
-        tuple val(sample), path("samestr_convert_DONE"), emit: sentinel
+        // tuple val(sample), path("samestr_convert_DONE"), emit: sentinel
         tuple val(sample), path("${sample.id}.samestr_convert_clades.txt"), emit: convert_info
+        tuple val(sample), val("samestr_convert_DONE"), emit: sentinel
 
     script:
     def keep_intermediates = (params.debug_convert) ? "--keep-tmp-files" : ""
@@ -113,8 +114,9 @@ process run_samestr_filter {
             path("sstr_filter/*.npz"), \
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
-        tuple val(batch_id), path("samestr_filter_DONE"), emit: sentinel
         path "sstr_stats/*.aln_stats.txt", emit: sstr_stats, optional: true
+        // tuple val(batch_id), path("samestr_filter_DONE"), emit: sentinel
+        tuple val(batch_id), val("samestr_filter_DONE"), emit: sentinel
 
 
     script:
