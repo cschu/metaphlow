@@ -69,7 +69,7 @@ workflow samestr_post_merge {
 				.join(filter_status_ch.success, by: 0)
 				// strip off unfiltered data and sentinel
 				// .map { species, data, names, input_data, input_names, sentinel -> [ species, data, names ] }
-				.map { batch_id, batch_size, files, sentinel -> [ batch_id, batch_size, files ] }
+				.map { batch_id, batch_size, file1, file2, sentinel -> [ batch_id, batch_size, file1, file2 ] }
 
 			filtered_ch.dump(pretty: true, tag: "filtered_ch")
 
