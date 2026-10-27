@@ -115,7 +115,13 @@ workflow samestr_post_convert {
 			run_samestr_merge(input_ch, params.samestr_marker_db)
 
 			if (!params.skip_merge_tarball) {
-				sstr_merge_tarball("sstr_merge", run_samestr_merge.out.sstr_npy.collect())
+				sstr_merge_tarball(
+					"sstr_merge",
+					run_samestr_merge.out.sstr_npy
+						.map { batch_id, batch_size, file1, file2 -> [ file1, file2 ] }
+						.collect()
+					// run_samestr_merge.out.sstr_npy.collect()
+				)
 			}
 
 			merge_info = run_samestr_merge.out.merge_info.collect()
