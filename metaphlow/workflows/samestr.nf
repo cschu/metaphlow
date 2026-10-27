@@ -37,11 +37,9 @@ workflow samestr_post_merge {
 
 			run_samestr_filter(filter_input, params.samestr_marker_db)
 
-			/* TEMPORARY BAN */
-			/*
 			// for each pre-filtered clade "snp matrix"
 			filter_input
-				.map { batch_id, batch_size, files, sentinel -> [ batch_id, sentinel ] }
+				.map { batch_id, batch_size, files -> batch_id }
 				// join 1 matrix to 1 filter sentinel
 				.join(run_samestr_filter.out.sentinel, by: 0, remainder: true)
 				.branch {
@@ -52,14 +50,15 @@ workflow samestr_post_merge {
 				}
 				.set { filter_status_ch }
 
+			// send filter-failures to filter guard -> if any, tear down pipeline
+			// filter_failure_guard(filter_status_ch.failure.map { species, data, names, sentinel -> species }, "filter")
+			filter_failure_guard(filter_status_ch.failure, "filter")
+			
 			// this is just a log operation
 			filter_input
 				.join(run_samestr_filter.out.sentinel, by: 0, remainder: true)
 				.dump(pretty: true, tag: "filter_status_ch")
 
-			// send filter-failures to filter guard -> if any, tear down pipeline
-			// filter_failure_guard(filter_status_ch.failure.map { species, data, names, sentinel -> species }, "filter")
-			filter_failure_guard(filter_status_ch.failure, "filter")
 
 			if (!params.skip_filter_tarball) {
 				sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy].flatten() }.collect())
@@ -77,6 +76,8 @@ workflow samestr_post_merge {
 			// filter_output = run_samestr_filter.out.sstr_npy
 			// 	.join(by: 0, run_samestr_filter.out.filter_sentinel)
 			// 	.map { batch_id, batch_size, samples, sstr_npy, sentinel -> [ batch_id, batch_size, samples, sstr_npy ] }
+			/* TEMPORARY BAN */
+			/*
 			*/
 
 		}
