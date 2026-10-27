@@ -85,7 +85,7 @@ workflow samestr_post_merge {
 
 		compare_input = filtered_ch
 			// .map { batch_id, batch_size, samples, sstr_npy -> [ samples, sstr_npy ] }
-			.map { batch_id, batch_size, files -> files }
+			.map { batch_id, batch_size, file1, file2 -> [file1, file2] }
 			.flatten()
 			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
 			.groupTuple(size: 2, sort: true)
