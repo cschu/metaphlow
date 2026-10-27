@@ -32,7 +32,7 @@ workflow samestr_post_merge {
 				.groupTuple(by: [0, 1])
 				.map { key, files -> [ key[0], key[1], files ] }
 
-			filter_input.dump(pretty: true, tag: "filter_input")
+			// filter_input.dump(pretty: true, tag: "filter_input")
 
 			run_samestr_filter(filter_input, params.samestr_marker_db)
 
@@ -118,7 +118,7 @@ workflow samestr_post_convert {
 				sstr_merge_tarball(
 					"sstr_merge",
 					run_samestr_merge.out.sstr_npy
-						.map { batch_id, batch_size, file1, file2 -> [ file(file1), file(file2) ] }
+						.map { batch_id, batch_size, file1, file2 -> [ file1, file2 ].flatten() }
 						.collect()
 					// run_samestr_merge.out.sstr_npy.collect()
 				)
