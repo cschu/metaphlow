@@ -118,7 +118,7 @@ workflow samestr_post_convert {
 				sstr_merge_tarball(
 					"sstr_merge",
 					run_samestr_merge.out.sstr_npy
-						.map { batch_id, batch_size, file1, file2 -> [ file1, file2 ] }
+						.map { batch_id, batch_size, file1, file2 -> [ file(file1), file(file2) ] }
 						.collect()
 					// run_samestr_merge.out.sstr_npy.collect()
 				)
