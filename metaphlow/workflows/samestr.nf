@@ -38,11 +38,12 @@ workflow samestr_post_merge {
 
 			// for each pre-filtered clade "snp matrix"
 			filter_input
+				.map { batch_id, batch_size, files, sentinel -> [ batch_id, sentinel ] }
 				// join 1 matrix to 1 filter sentinel
 				.join(run_samestr_filter.out.sentinel, by: 0, remainder: true)
 				.branch {
 					// if sentinel is not present (i.e., filter failed) -> FAILURE
-					failure: it[3] == null
+					failure: it[1] == null
 					// else -> SUCCESS
 					success: true
 				}
@@ -55,6 +56,7 @@ workflow samestr_post_merge {
 
 			// send filter-failures to filter guard -> if any, tear down pipeline
 			// filter_failure_guard(filter_status_ch.failure.map { species, data, names, sentinel -> species }, "filter")
+			filter_failure_guard(filter_status_ch.failure, "filter")
 
 			if (!params.skip_filter_tarball) {
 				sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy].flatten() }.collect())
@@ -64,7 +66,8 @@ workflow samestr_post_merge {
 			filtered_ch = run_samestr_filter.out.sstr_npy
 				.join(filter_status_ch.success, by: 0)
 				// strip off unfiltered data and sentinel
-				.map { species, data, names, input_data, input_names, sentinel -> [ species, data, names ] }
+				// .map { species, data, names, input_data, input_names, sentinel -> [ species, data, names ] }
+				.map { batch_id, batch_size, files, sentinel -> [ batch_id, batch_size, files ] }
 
 			filtered_ch.dump(pretty: true, tag: "filtered_ch")
 
@@ -78,7 +81,8 @@ workflow samestr_post_merge {
 		collate_samestr_stats(run_samestr_filter.out.sstr_stats.collect())
 
 		compare_input = filtered_ch
-			.map { batch_id, batch_size, samples, sstr_npy -> [ samples, sstr_npy ] }
+			// .map { batch_id, batch_size, samples, sstr_npy -> [ samples, sstr_npy ] }
+			.map { batch_id, batch_size, files -> files }
 			.flatten()
 			.map { file -> [ file.name.replaceAll(/\.(npz|names\.txt)$/, ""), file ] }
 			.groupTuple(size: 2, sort: true)
