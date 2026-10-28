@@ -132,7 +132,8 @@ workflow samestr_post_convert {
 				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
 				.groupTuple(by: 0)
 
-			run_samestr_merge(input_ch, params.samestr_marker_db)
+			// run_samestr_merge(input_ch, params.samestr_marker_db)
+			run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
 
 			if (!params.skip_merge_tarball) {
 				sstr_merge_tarball(
