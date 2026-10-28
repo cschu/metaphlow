@@ -122,9 +122,9 @@ workflow samestr_post_convert {
 
 		} else {
 
-			convert_info = input_ch
-				.map { file -> "${file.parent}/${file.name}" }
-				.collectFile(name: "${workDir}/convert_clades.txt", newLine: true)
+			// convert_info = input_ch
+			// 	.map { file -> "${file.parent}/${file.name}" }
+			// 	.collectFile(name: "${workDir}/convert_clades.txt", newLine: true)
 
 			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
 
@@ -244,14 +244,15 @@ workflow samestr_full {
 		}
 
 		if (!params.stop_after_convert) {
-			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
+			// sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
 
-			grouped_npy_ch = sstr_convert_buffer.out.batches
-				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
-				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
-				.groupTuple(by: 0)
+			// grouped_npy_ch = sstr_convert_buffer.out.batches
+			// 	.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
+			// 	.map { item -> [item.batch_id, item.batch_size, item.file_path] }
+			// 	.groupTuple(by: 0)
 
-			samestr_post_convert(grouped_npy_ch, tax_profiles)
+			// samestr_post_convert(grouped_npy_ch, tax_profiles)
+			samestr_post_convert(convert_info, tax_profiles)
 		}
 
 }
@@ -346,14 +347,4 @@ workflow samestr_full {
 // 			.groupTuple(sort: true)
 // >>>>>>> main
 
-// 		if (!params.stop_after_convert) {
-// 			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
-
-// 			grouped_npy_ch = sstr_convert_buffer.out.batches
-// 				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
-// 				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
-// 				.groupTuple(by: 0)
-
-// 			samestr_post_convert(grouped_npy_ch, tax_profiles)
-// 		}
 // }
