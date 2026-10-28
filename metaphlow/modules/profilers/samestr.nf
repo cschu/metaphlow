@@ -67,7 +67,6 @@ process run_samestr_convert {
 }
 
 process run_samestr_merge {
-    publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
     tag "clade_batch_C${batch_id}"
     label "large"
@@ -155,7 +154,6 @@ process run_samestr_filter {
 }
 
 process run_samestr_stats {
-    publishDir params.output_dir, mode: "copy"
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
     tag "clade_batch_M${batch_id}"
     label "large"
@@ -309,7 +307,6 @@ process sstr_tarball {
 }
 
 process samestr_buffer {
-	publishDir params.output_dir, mode: "copy"
 	label "samestr_buffer"
 	tag "Generating ${procname} clade batches..."
 
