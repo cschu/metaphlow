@@ -123,6 +123,7 @@ workflow samestr_post_convert {
 		} else {
 
 			convert_info = input_ch
+				.map { file -> "${file.parent}/${file.name}" }
 				.collectFile(name: "${workDir}/convert_input.txt", newLine: true)
 
 			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
