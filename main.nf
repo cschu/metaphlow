@@ -27,7 +27,6 @@ workflow metaphlow_upstream {
 
 	main:
 		fastq_input(
-			// Channel.fromPath(fastq_input_pattern),
 			input_fastq_ch,
 			Channel.of(null)
 		)
@@ -111,7 +110,6 @@ workflow {
       
 	} else {
 
-		// mp4_tables = Channel.fromPath(input_dir + "/mp4_profiles/**.mp4.txt")
 		mp4_tables = Channel.fromPath(input_dir + "/**.mp4.txt")
 			.map { file ->
 				def meta = [:]
@@ -155,7 +153,6 @@ workflow {
 
 				} else {
 
-					// ss_converted = Channel.fromPath(input_dir + "/**.npz")
 					merge_input_ch = npz_ch
 						.map { file ->
 							def species = file.name.replaceAll(/[.].*/, "")
@@ -179,7 +176,6 @@ workflow {
 
 				} else {			
 
-					// npz_ch = Channel.fromPath(input_dir + "/**.npz")
 					npz_ch = npz_ch
 						.map { file -> [ file.name.replaceAll(/.npz$/, ""), file ] }
 					names_ch = Channel.fromPath(input_dir + "/**.names.txt")

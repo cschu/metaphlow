@@ -23,6 +23,11 @@ process failure_guard {
 
 }
 
+// SQLITE-BASED DB
+// def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
+// def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
+// def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
+
 process run_samestr_convert {
     container "ghcr.io/danielpodlesny/samestr:v1.2025.102"
     tag "${sample.id}"
@@ -33,19 +38,14 @@ process run_samestr_convert {
     input:
 		tuple val(sample), path(mp_sam), path(mp_profile)
 		path(marker_db)
-        // path(marker_sqlite)
 
     output:
         tuple val(sample), path("sstr_convert/*/*.npz"), emit: sstr_npy, optional: true
-        // tuple val(sample), path("samestr_convert_DONE"), emit: sentinel
         tuple val(sample), path("${sample.id}.samestr_convert_clades.txt"), emit: convert_info
         tuple val(sample), val("samestr_convert_DONE"), emit: sentinel
 
     script:
     def keep_intermediates = (params.debug_convert) ? "--keep-tmp-files" : ""
-    // def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
-    //def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
-    //def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
 
     """
     set -e -o pipefail
@@ -105,7 +105,6 @@ process run_samestr_filter {
     input:
         tuple val(batch_id), val(batch_size), path(files)
 	    path(marker_db)
-        // path(marker_sqlite)
 
     output:
         tuple \
@@ -115,16 +114,12 @@ process run_samestr_filter {
             path("sstr_filter/*.names.txt"), \
         emit: sstr_npy, optional: true
         path "sstr_stats/*.aln_stats.txt", emit: sstr_stats, optional: true
-        // tuple val(batch_id), path("samestr_filter_DONE"), emit: sentinel
         tuple val(batch_id), val("samestr_filter_DONE"), emit: sentinel
 
 
     script:
     // #    --global-pos-min-n-vcov 10 \
     // #    --sample-pos-min-n-vcov 2 \
-    // def sqlite_db = (params.db_dev) ? "--sqlitedb samestr.db.copy" : ""
-    // def prep_db = (params.db_dev && params.copy_sqlite) ? "cp -v ${marker_sqlite} samestr.db.copy" : "ln -s ${marker_sqlite} samestr.db.copy"
-    // def delete_db = (params.db_dev) ? "rm -fv samestr.db.copy" : ""
 
     """
     set -e -o pipefail
