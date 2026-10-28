@@ -122,11 +122,11 @@ workflow samestr_post_convert {
 
 		} else {
 
-			convert_info = input_ch
-				.map { file -> "${file.parent}/${file.name}" }
-				.collectFile(name: "${workDir}/convert_input.txt", newLine: true)
+			// convert_info = input_ch
+			// 	.map { file -> "${file.parent}/${file.name}" }
+			// 	.collectFile(name: "${workDir}/convert_input.txt", newLine: true)
 
-			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
+			sstr_convert_buffer("convert", input_ch.collect(), params.convert_batch_size)
 
 			grouped_npy_ch = sstr_convert_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
