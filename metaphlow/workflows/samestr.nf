@@ -122,6 +122,16 @@ workflow samestr_post_convert {
 
 		} else {
 
+			convert_info = input_ch
+				.collectFile(name: "${workDir}/convert_input.txt", newLine: true)
+
+			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
+
+			grouped_npy_ch = sstr_convert_buffer.out.batches
+				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
+				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
+				.groupTuple(by: 0)
+
 			run_samestr_merge(input_ch, params.samestr_marker_db)
 
 			if (!params.skip_merge_tarball) {
