@@ -145,6 +145,7 @@ workflow {
 		} else {
 
 			npz_ch = Channel.fromPath(input_dir + "/**.npz")
+			npz_ch.dump(pretty: true, tag: "npz_ch")
 			
 			if (params.run_mode == "samestr_post_convert") {
 
