@@ -169,7 +169,7 @@ workflow {
 					.map { file -> "${file.parent}/${file.name}" }
 					.collectFile(name: "${workDir}/convert_clades.txt", newLine: true)
 
-				samestr_post_convert(npz_ch, mp4_tables)        
+				samestr_post_convert(convert_info, mp4_tables)        
 
 			} else if (params.run_mode == "samestr_post_merge") {
 
