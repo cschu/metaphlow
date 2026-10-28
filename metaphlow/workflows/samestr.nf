@@ -126,7 +126,7 @@ workflow samestr_post_convert {
 			// 	.map { file -> "${file.parent}/${file.name}" }
 			// 	.collectFile(name: "${workDir}/convert_clades.txt", newLine: true)
 
-			sstr_convert_buffer("convert", convert_info, params.convert_batch_size)
+			sstr_convert_buffer("convert", input_ch, params.convert_batch_size)
 
 			grouped_npy_ch = sstr_convert_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
