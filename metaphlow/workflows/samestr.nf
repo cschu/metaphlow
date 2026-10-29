@@ -114,7 +114,7 @@ workflow samestr_post_convert {
 
 			grouped_npy_ch = sstr_convert_buffer.out.batches
 				.splitCsv(header: ['batch_id', 'batch_size', 'file_path'], sep: '\t' )
-				.filter { item -> file(item.file_path).name != "" }
+				.filter { item -> (item.file_path != "" && item.file_path != null) }
 				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
 				.groupTuple(by: [0, 1])
 
