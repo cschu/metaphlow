@@ -117,7 +117,7 @@ workflow samestr_post_convert {
 				.map { item -> [item.batch_id, item.batch_size, item.file_path] }
 				.groupTuple(by: [0, 1])
 
-			grouped_npy_ch.dump(pretty: true, tag: "merge_input")
+			grouped_npy_ch.map { batch_id, batch_size, files -> [ batch_id, batch_size, files.size() ] }.dump(pretty: true, tag: "merge_input")
 
 			run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
 
