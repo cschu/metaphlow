@@ -34,10 +34,22 @@ def main():
 	for f in files:
 		if f.endswith("_clades.txt"):
 			with open(f, "rt") as _in:
+<<<<<<< HEAD
 				for path in _in.read().rstrip().split("\n"):
 					# /scratch/schudoma/WORK/mpow_ssdev/flow_test/e4/5394ca9f37fb1d77be77d211c6e5e2/sstr_convert/SAMN17485756.mp4/t__SGB1861.SAMN17485756.mp4.npz
 					# /path/to/t__SGB14039.names.txt
 					ff = path[path.rfind("/") + 1:]
+=======
+				# for path in _in.read().rstrip().split("\n"):
+				for path in _in.readlines():
+					path = path.rstrip()
+					if not path:
+						continue
+					# /scratch/schudoma/WORK/mpow_ssdev/flow_test/e4/5394ca9f37fb1d77be77d211c6e5e2/sstr_convert/SAMN17485756.mp4/t__SGB1861.SAMN17485756.mp4.npz
+					# /path/to/t__SGB14039.names.txt
+					# ff = path[path.rfind("/") + 1:]
+					ff = path.rsplit("/", 1)[-1]
+>>>>>>> main
 					d.setdefault(ff[:ff.find(".")], []).append(path)
 
 	batches = [[]]
@@ -52,9 +64,9 @@ def main():
 			for k, v in d.items()
 		}
 
-	for fbid, fbsize in fbatch_sizes.items():
+	for fbid, fbsize in sorted(fbatch_sizes.items(), key=lambda x:x[1], reverse=True,):
 		for i, (batch, bsize) in enumerate(zip(batches, batch_sizes)):
-			if bsize + fbsize <= args.max_size:
+			if (bsize == 0) or (bsize + fbsize <= args.max_size):
 				batch += d[fbid]
 				batch_sizes[i] += fbsize
 				break
@@ -65,7 +77,8 @@ def main():
 	
 	for i, (batch, bsize) in enumerate(zip(batches, batch_sizes)):
 		for f in batch:
-			print(i, bsize, f, sep="\t")
+			if f:
+				print(i, bsize, f, sep="\t")
 
 
 if __name__ == "__main__":
