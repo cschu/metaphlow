@@ -58,7 +58,7 @@ workflow samestr_post_merge {
 				.dump(pretty: true, tag: "filter_status_ch")
 
 
-			if (!params.skip_filter_tarball) {
+			if (params.write_filter_tarball) {
 				sstr_filter_tarball("sstr_filter", run_samestr_filter.out.sstr_npy.map { batch_id, batch_size, samples, sstr_npy -> [samples, sstr_npy].flatten() }.collect())
 			}
 
@@ -84,7 +84,7 @@ workflow samestr_post_merge {
 
 		run_samestr_compare(compare_input, params.samestr_marker_db)
 		
-		if (!params.skip_compare_tarball) {
+		if (params.write_compare_tarball) {
 			sstr_compare_tarball("sstr_compare", run_samestr_compare.out.sstr_compare.collect())
 		}
 
@@ -122,7 +122,7 @@ workflow samestr_post_convert {
 
 			run_samestr_merge(grouped_npy_ch, params.samestr_marker_db)
 
-			if (!params.skip_merge_tarball) {
+			if (params.write_merge_tarball) {
 				sstr_merge_tarball(
 					"sstr_merge",
 					run_samestr_merge.out.sstr_npy.collect()
@@ -164,7 +164,7 @@ workflow samestr_convert {
 		// send all FAILURES to the guard, which will do nothing but report, fail, and tear down the pipeline
 		convert_failure_guard(convert_status_ch.failure.map { sample, data, sentinel -> sample.id }, "convert")
 
-		if (!params.skip_convert_tarball) {
+		if (params.write_convert_tarball) {
 			sstr_convert_tarball(
 				"sstr_convert",
 				run_samestr_convert.out.sstr_npy.map { sample, data -> [data].flatten() }.collect()
