@@ -10,9 +10,6 @@ include { multiqc } from "../modules/qc/multiqc"
 include { calculate_library_size_cutoff; subsample_reads } from "../modules/qc/subsample"
 
 
-def merge_pairs = (params.merge_pairs || false)
-def keep_orphans = (params.keep_orphans || false)
-
 def asset_dir = "${projectDir}/nevermore/assets"
 
 // this nonsense parameter-rearrangement is necessary for nf-core schema/clowm compatibility
